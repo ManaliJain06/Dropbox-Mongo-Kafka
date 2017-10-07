@@ -8,23 +8,26 @@ var cors = require('cors');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var sessionManagement = require('./routes/sessionManagement');
+// var session = require('express-session');
 var session = require('client-sessions');
+var jwt = require('jsonwebtoken');
 
 var app = express();
 
-app.use(session({
-    cookieName: 'session',
-    secret: 'dropbox_prototype_session',
-    duration: 15 * 60 * 1000,    //time for active session
-    activeDuration: 1 * 60 * 1000,
-    path : '/',
-    httpOnly: false })); // time for the session to be active when the window is open // 5 minutes set currently
+
+// app.use(session({
+//     cookieName: 'session',
+//     secret: 'dropbox_prototype_session',
+//     duration: 15 * 60 * 1000,    //time for active session
+//     activeDuration: 60 * 60 * 1000,
+// })); // time for the session to be active when the window is open // 5 minutes set currently
 
 var corsOptions = {
     origin: 'http://localhost:3000',
     credentials: true,
     optionsSuccessStatus: 200
-}
+};
 
 app.use(cors(corsOptions));
 
@@ -41,7 +44,7 @@ app.set('view engine', 'jade');
 app.use(cors());
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -49,34 +52,50 @@ app.use(express.static(path.join(__dirname, 'public')));
 // // app.use('/users', users);
 app.post("/signup", dropboxUser.userSignupData);
 app.post("/login", dropboxUser.userLoginData);
-app.post("/postUserInterest", dropboxUser.postUserInterest);
-app.post("/postUserAbout", dropboxUser.postUserAbout);
-app.post("/signout",dropboxUser.signout);
+// app.post("/postUserInterest", dropboxUser.postUserInterest);
+app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
+app.post("/signout", dropboxUser.signout);
 app.use('/files', files);
-// app.post("/substract",operations.substract);
-// app.post("/multiply",operations.multiply);
-// app.post("/divide",operations.divide);
+app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
+// res.render('admin.html');
+
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+app.use(function (req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 // error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 app.listen(3003, function () {
     console.log("Server started on port: " + 3003);
 });
+
+//JWT session
+// exports.generateToken = function(user) {
+//     //1. Dont use password and other sensitive fields
+//     //2. Use fields that are useful in other parts of the
+//     //app/collections/models
+//     var u = {
+//         name: user.name,
+//         username: user.username,
+//         admin: user.admin,
+//         _id: user._id.toString(),
+//     };
+//     return token = jwt.sign(u, process.env.JWT_SECRET, {
+//         expiresIn: 60 * 60 * 24 // expires in 24 hours
+//     });
+// }
 
 module.exports = app;
 

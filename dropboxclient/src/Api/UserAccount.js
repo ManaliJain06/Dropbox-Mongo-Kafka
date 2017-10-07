@@ -3,13 +3,18 @@
  */
 const axios = require("axios");
 // const api = process.env.REACT_APP_CONTACTS_API_URL || 'http://localhost:3001'
+// const token = localStorage.jwtToken;
 
 
 export const saveInterest = (payload) => {
-    console.log("payload", payload)
-    return axios.post('http://localhost:3003/postUserInterest', {data: payload, credentials:'include' }
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
+    return axios.post('http://localhost:3003/postUserInterest', payload, {
+            headers: { 'authorization': token }
+        }
     )
         .then(function (response) {
+            console.log("cookie: ",document.cookie);
             console.log(response);
             return response
         })
@@ -20,8 +25,11 @@ export const saveInterest = (payload) => {
 };
 
 export const saveAbout = (payload) => {
+    const token = sessionStorage.jwtToken;
     console.log("payload", payload)
-    return axios.post('http://localhost:3003/postUserAbout', {data: payload, credentials:'include'}
+    return axios.post('http://localhost:3003/postUserAbout', payload, {
+            headers: { 'authorization': token }
+        }
     )
         .then(function (response) {
             console.log(response);

@@ -67,6 +67,14 @@ class Interest extends Component{
                         isLoggedIn: false,
                         message: res.data.message
                     });
+                } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
+                    alert("Token expired or invalid. Please login again");
+                    this.setState({
+                        isLoggedIn: false,
+                        message: res.data.message
+                    });
+                    sessionStorage.removeItem("jwtToken");
+                    this.props.loginState(false);
                 }
             });
     };

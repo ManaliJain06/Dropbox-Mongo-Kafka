@@ -33,6 +33,8 @@ class Login extends Component{
                             isLoggedIn: true,
                             message: res.data.message
                         });
+                        const token = res.data.token;
+                        sessionStorage.setItem('jwtToken',token);
                         this.props.loginState(res.data.isLogged);
                         this.props.loginData(res.data.payload);
                     } else if (res.data.statusCode === 500) {

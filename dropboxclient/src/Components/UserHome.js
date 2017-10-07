@@ -20,6 +20,7 @@ class UserHome extends Component {
         API.signout()
             .then((res) => {
                 if (res.data.statusCode === 401) {
+                    window.sessionStorage.removeItem('jwtToken');
                     this.props.loginState(false);
                 } else {
                     console.log("error occured");

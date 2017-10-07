@@ -5,6 +5,8 @@ var uuid = require('uuid/v4');
 var mysqlConnection = require('./mysqlConnector');
 var session = require('client-sessions');
 var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
+// var app = require('../app');
 // var hash = require('./encryption').hash;
 
 function checkErrors(err,result,res){
@@ -104,16 +106,48 @@ exports.userLoginData = function(req,res) {
                 bcrypt.compare(password, result[0].password).then(function (check) {
                     // check the response
                     if (check) {
-                        req.session.email = email;
+                        // req.session.email = email;
+                        // console.log("session set", req.session.email);
+
+                        //JWT
                         var msg = "Valid user";
+                        var body = result[0];
+                        const user = {
+                            name: body.firstname,
+                            id: body.id,
+                            username: body.lastname,
+                            email: body.email,
+                        };
+
+                        const token = jwt.sign(user, 'dropbox', {
+                            expiresIn: '2m' // expires in 24 hours
+                        });
+                        console.log("token",token);
                         jsonResponse = {
+                            "user": user,
+                            "token": token,
                             "statusCode": 201,
                             "result": "Success",
                             "message": msg,
                             "isLogged": true,
                             "payload": result
-                        };
+                            };
                         res.send(jsonResponse);
+
+
+
+                         //JWT close
+
+                        // var msg = "Valid user";
+                        // jsonResponse = {
+                        //     "statusCode": 201,
+                        //     "result": "Success",
+                        //     "message": msg,
+                        //     "isLogged": true,
+                        //     "payload": result
+                        // };
+                        // res.send(jsonResponse);
+
                     } else {
                         var msg = "Invalid userName or Password";
                         jsonResponse = {
@@ -136,23 +170,7 @@ exports.userLoginData = function(req,res) {
             }
         }
     });
-}
-
-exports.redirectToHomepage = function(req,res)
-{
-    //Checks before redirecting whether the session is valid
-    if(req.session.email)
-    {
-        //Set these headers to notify the browser not to maintain any cache for the page being loaded
-        res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-        res.render("homepage",{username:req.session.username});
-    }
-    else
-    {
-        res.redirect('/');
-    }
 };
-
 
 exports.signout = function(req,res)
 {
@@ -166,18 +184,18 @@ exports.signout = function(req,res)
 };
 
 exports.postUserInterest = function(req,res) {
-
+ // console.log("session", req.session.email);
     // if(req.session.email){
         let jsonRequest ={
-            "music" : req.body.data.music,
-            "sports" : req.body.data.sports,
-            "shows" : req.body.data.shows,
-        }
+            "music" : req.body.music,
+            "sports" : req.body.sports,
+            "shows" : req.body.shows,
+        };
         let request = JSON.stringify(jsonRequest);
         console.log(request);
         let jsonResponse ={};
 
-        let userInterest  = "update User set interest='" + request + "' where  id = '"+req.body.data.id+"';";
+        let userInterest  = "update User set interest='" + request + "' where  id = '"+req.body.id+"';";
         console.log(userInterest);
         // let userInterest  ="insert into User set interest=?" +
         //     " where  id = '"+req.body.data.id+"' and uuid = '" + req.body.data.uuid+"';";
@@ -223,16 +241,16 @@ exports.postUserInterest = function(req,res) {
 
 exports.postUserAbout = function(req,res) {
     let jsonRequest ={
-        "work" : req.body.data.work,
-        "education" : req.body.data.education,
-        "phone" : req.body.data.phone,
-        "events" : req.body.data.events
+        "work" : req.body.work,
+        "education" : req.body.education,
+        "phone" : req.body.phone,
+        "events" : req.body.events
     }
     let request = JSON.stringify(jsonRequest);
     console.log(request);
     let jsonResponse ={};
 
-    let userInterest  = "update User set overview='" + request + "' where  id = '"+req.body.data.id+"';";
+    let userInterest  = "update User set overview='" + request + "' where  id = '"+req.body.id+"';";
     console.log(userInterest);
     // let userInterest  ="insert into User set interest=?" +
     //     " where  id = '"+req.body.data.id+"' and uuid = '" + req.body.data.uuid+"';";

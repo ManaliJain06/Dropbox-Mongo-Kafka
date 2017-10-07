@@ -69,11 +69,21 @@ class About extends Component{
                         isLoggedIn: false,
                         message: res.data.message
                     });
+                } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
+                    alert("Token expired or invalid. Please login again");
+                    this.setState({
+                        isLoggedIn: false,
+                        message: res.data.message
+                    });
+                    sessionStorage.removeItem("jwtToken");
+                    this.props.loginState(false);
                 }
             });
     };
 
     render() {
+        let loginData = this.props.loginDataProp;
+        let name = loginData.firstname  + " " + loginData.lastname;
         let messagediv =null;
         if(this.state.message !== ''){
             messagediv = <div className="clearfix">
@@ -101,7 +111,7 @@ class About extends Component{
                                     Name
                                 </div>
                                 <div className="col-sm-offset-1 col-sm-7">
-                                    {loginData.firstName + loginData.lastName}
+                                    {name}
                                 </div>
                             </div>
                             <div className="row">
