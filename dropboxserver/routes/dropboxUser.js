@@ -5,7 +5,7 @@ var uuid = require('uuid/v4');
 var mysqlConnection = require('./mysqlConnector');
 var session = require('client-sessions');
 var bcrypt = require('bcryptjs');
-var hash = require('./encryption').hash;
+// var hash = require('./encryption').hash;
 
 function checkErrors(err,result,res){
     if(err){
@@ -17,59 +17,71 @@ function checkErrors(err,result,res){
 }
 exports.userSignupData = function(req, res){
     //assigning unique id to eac user
-    var uuidv4 = uuid();
+    let uuidv4 = uuid();
     console.log(uuidv4);
 
-    var jsonResponse ={};
+    let jsonResponse ={};
+    let saltRounds = 10;
 
     //encrypting password using bcrypt js
-    var salt = bcrypt.genSaltSync(10);
-    console.log("Salt: "+salt);
-    var encryptedPassword = bcrypt.hashSync(req.body.data.password,salt);
+    // var salt = bcrypt.genSaltSync(10);
+    // console.log("Salt: "+salt);
+    // var encryptedPassword = bcrypt.hashSync(req.body.data.password,salt);
 
-    var userDetails  ="insert into User(firstname,lastname,email,password,user_uuid,salt) values ('"
-        +req.body.data.firstName+"','"+req.body.data.lastName+"','"
-        +req.body.data.email+"','"+encryptedPassword+"','"+uuidv4+"','"+salt+"');";
-    console.log(userDetails);
+    bcrypt.hash(req.body.data.password, saltRounds).then(function(hash) {
+        console.log("hash :", hash);
+        let userDetails  ="insert into User(firstname,lastname,email,password,user_uuid) values ('"
+            +req.body.data.firstName+"','"+req.body.data.lastName+"','"
+            +req.body.data.email+"','"+hash+"','"+uuidv4+"');";
+        console.log("query:",userDetails );
+        console.log(userDetails);
 
-    mysqlConnection.userSignup(userDetails, function(err,result){
-        if(err){
-            if(err.code ==="ER_DUP_ENTRY"){
-                var msg = "Username Already exists";
-                jsonResponse = {
-                    "statusCode": 401,
-                    "result": "Error",
-                    "message" : msg
-                };
-                res.send(jsonResponse);
-            } else{
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message" : msg
-                };
-            }
-        } else {
-            if(result.affectedRows>0){
-                var msg = "Successfully Registered. Please login with your credentials";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "Success",
-                    "message" : msg
-                };
-                res.send(jsonResponse);
+        mysqlConnection.userSignup(userDetails, function(err,result){
+            if(err){
+                if(err.code ==="ER_DUP_ENTRY"){
+                    var msg = "Username Already exists";
+                    jsonResponse = {
+                        "statusCode": 401,
+                        "result": "Error",
+                        "message" : msg
+                    };
+                    res.send(jsonResponse);
+                } else{
+                    var msg = "Error Occured";
+                    jsonResponse = {
+                        "statusCode": 500,
+                        "result": "Error",
+                        "message" : msg
+                    };
+                }
             } else {
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 400,
-                    "result": "Error",
-                    "message" : msg
-                };
-                res.send(jsonResponse);
+                if(result.affectedRows>0){
+                    var msg = "Successfully Registered. Please login with your credentials";
+                    jsonResponse = {
+                        "statusCode": 201,
+                        "result": "Success",
+                        "message" : msg
+                    };
+                    res.send(jsonResponse);
+                } else {
+                    var msg = "Error Occured";
+                    jsonResponse = {
+                        "statusCode": 400,
+                        "result": "Error",
+                        "message" : msg
+                    };
+                    res.send(jsonResponse);
+                }
             }
-        }
+        });
     });
+
+    // var userDetails  ="insert into User(firstname,lastname,email,password,user_uuid,salt) values ('"
+    //     +req.body.data.firstName+"','"+req.body.data.lastName+"','"
+    //     +req.body.data.email+"','"+encryptedPassword+"','"+uuidv4+"','"+salt+"');";
+    // console.log(userDetails);
+
+
 }
 
 exports.userLoginData = function(req,res) {
@@ -88,9 +100,10 @@ exports.userLoginData = function(req,res) {
             };
         } else {
             console.log(result);
-            if(result.length > 0){
-                hash(password, result[0].salt, function(err, hash) {
-                    if (result[0].password === hash.toString()) {
+            if(result.length > 0) {
+                bcrypt.compare(password, result[0].password).then(function (check) {
+                    // check the response
+                    if (check) {
                         req.session.email = email;
                         var msg = "Valid user";
                         jsonResponse = {
@@ -111,13 +124,13 @@ exports.userLoginData = function(req,res) {
                         res.send(jsonResponse);
                     }
                 });
-
-            } else {
-                var msg = "Error Occured";
+            }else{
+                console.log("Invalid");
+                var msg = "User doesn't exist. Please Signup to continue";
                 jsonResponse = {
                     "statusCode": 400,
-                    "result": "Error",
-                    "message" : msg
+                    "result": "Success",
+                    "message": msg,
                 };
                 res.send(jsonResponse);
             }
