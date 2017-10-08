@@ -158,7 +158,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 function mapStateToProps(state) {
-    "use strict";
     console.log("state App", state)
     return{
         loginDataProp : state.loginData

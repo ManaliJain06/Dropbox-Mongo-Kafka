@@ -30,6 +30,8 @@ exports.verifyToken = function(req,res,next) {
             } else {
                 console.log("verified");
                 console.log("data",data);
+                module.exports.user_uuid = data.user_uuid;
+                console.log(module.exports.user_uuid);
                 next();
             }
         })

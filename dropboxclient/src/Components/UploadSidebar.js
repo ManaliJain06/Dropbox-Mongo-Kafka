@@ -5,14 +5,16 @@
 import React, {Component} from 'react';
 import * as API from '../Api/FileUpload';
 import {connect} from 'react-redux';
+import {userMenu, loginState} from '../Actions/index';
 
 class UploadSidebar extends Component{
     constructor(props) {
         super(props);
-            this.state = ({
-                "valid": false,
-                "payload": ''
-            });
+        // let loginData = this.props.loginDataProp;
+        // this.state = {
+        //     "user_uuid" : loginData.user_uuid,
+        //     "message" : ''
+        // }
     }
     // handleFileUpload = (event) => {
     //     if (event.target.files[0]) {
@@ -44,12 +46,16 @@ class UploadSidebar extends Component{
 
     handleFileUpload = (event) => {
         const payload = new FormData();
-        // payload.append('doc', event.target.files[0]);
-        var x = event.target.files[0];
-        API.uploadFile(x)
-            .then((status) => {
-                if (status === 204) {
+        let loginData = this.props.loginDataProp;
+        payload.append('file', event.target.files[0]);
+        payload.append('user_uuid', loginData.user_uuid);
 
+        API.uploadFile(payload)
+            .then((res) => {
+                if (res.status === 200) {
+
+                } else {
+                    alert("Error in file upload");
                 }
             });
     };
@@ -61,18 +67,21 @@ class UploadSidebar extends Component{
                 <div className="side-buttons">
                         <div className="upload-button">
                             <div>Upload Files</div>
-                            <input className="upload" type="file" name="doc"
+                            <input className="upload" type="file" name="file"
                                    onChange={this.handleFileUpload}/>
                         </div>
                 </div>
                 </form>
+
                 <div className="side-buttons">
                     <button className="btn btn-primary btn-sm mc-button-primary">
                         New shared folder
                     </button>
                 </div>
+
                 <div className="side-buttons">
-                    <button className="btn btn-primary btn-sm mc-button-primary" >
+                    <button className="btn btn-primary btn-sm mc-button-primary"
+                            onClick = {() => this.props.userMenu('folder')}>
                         New folder
                     </button>
                 </div>
@@ -80,24 +89,20 @@ class UploadSidebar extends Component{
         );
     }
 }
-// export default Interest;
-// function mapDispatchToProps(dispatch) {
-//     // return bindActionCreators({loginState:loginState},dispatch)
-//     return {
-//         loginState: (data) => dispatch(loginState(data)),
-//         loginData: (data) => dispatch(loginData(data)),
-//         interestUpdate: (data) => dispatch(interestUpdate(data))
-//     };
-// }
-
 function mapStateToProps(state) {
-    "use strict";
-    console.log("state App", state)
     return{
+        userMenuSelection: state.userMenu,
         loginDataProp : state.loginData
     };
 
-
 }
 
-export default connect(mapStateToProps, null)(UploadSidebar);
+function mapDispatchToProps(dispatch) {
+    // return bindActionCreators({loginState:loginState},dispatch)
+    return {
+        userMenu: (data) => dispatch(userMenu(data)),
+        loginState: (data) => dispatch(loginState(data))
+    };
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(UploadSidebar);

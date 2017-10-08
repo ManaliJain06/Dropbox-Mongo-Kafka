@@ -9,6 +9,7 @@ import {userMenu, loginState} from '../Actions/index';
 import Home from './Home';
 import About from './About';
 import Interest from './Interest';
+import Folder from './Folder';
 import Files from './Files';
 import * as API from '../Api/UserLogin';
 
@@ -41,6 +42,9 @@ class UserHome extends Component {
         }
         if(this.props.userMenuSelection.menuSelection === 'files'){
             switchDecision = <Files/>;
+        }
+        if(this.props.userMenuSelection.menuSelection === 'folder'){
+            switchDecision = <Folder/>;
         }
 
         return (
@@ -99,7 +103,9 @@ class UserHome extends Component {
                                 </div>
                             </div>
                         </header>
+
                         {switchDecision}
+
                     </div>
 
 

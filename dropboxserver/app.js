@@ -32,6 +32,7 @@ var corsOptions = {
 app.use(cors(corsOptions));
 
 var dropboxUser = require('./routes/dropboxUser');
+var directory= require('./routes/directory');
 var files = require('./routes/files');
 
 // view engine setup
@@ -40,7 +41,6 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
 app.use(cors());
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -55,8 +55,13 @@ app.post("/login", dropboxUser.userLoginData);
 // app.post("/postUserInterest", dropboxUser.postUserInterest);
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);
-app.use('/files', files);
+app.use('/files',sessionManagement.verifyToken, files.saveFile);
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
+app.post('/createDirectory', directory.createDirectory);
+app.post('/deleteDirectory', directory.deleteDirectory);
+app.post('/getFiles', directory.getFiles);
+
+app.post('/starDirectory', directory.starDir_files);
 // res.render('admin.html');
 
 

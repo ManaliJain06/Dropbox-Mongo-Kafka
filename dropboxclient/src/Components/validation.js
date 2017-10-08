@@ -119,3 +119,13 @@ export const about = (data) => {
     }
     return msg;
 };
+
+export const folderName = (data) => {
+    let msg = "";
+
+    if(data.dir_name === ''){
+            msg = "Enter Folder name";
+            return msg;
+    }
+    return msg;
+};

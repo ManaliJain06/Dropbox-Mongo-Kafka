@@ -18,7 +18,7 @@ function checkErrors(err,result,res){
     }
 }
 exports.userSignupData = function(req, res){
-    //assigning unique id to eac user
+    //assigning unique id to user
     let uuidv4 = uuid();
     console.log(uuidv4);
 
@@ -55,6 +55,7 @@ exports.userSignupData = function(req, res){
                         "result": "Error",
                         "message" : msg
                     };
+                    res.send(jsonResponse);
                 }
             } else {
                 if(result.affectedRows>0){
@@ -117,10 +118,11 @@ exports.userLoginData = function(req,res) {
                             id: body.id,
                             username: body.lastname,
                             email: body.email,
+                            user_uuid: body.user_uuid
                         };
 
                         const token = jwt.sign(user, 'dropbox', {
-                            expiresIn: '2m' // expires in 24 hours
+                            expiresIn: '30m' // expires in 30 mins
                         });
                         console.log("token",token);
                         jsonResponse = {
