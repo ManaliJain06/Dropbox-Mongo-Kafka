@@ -1,0 +1,38 @@
+<div class="maestro-nav__container">
+    <div class="maestro-nav__panel">
+        <a class="maestro-nav__home-button" 				href="https://www.dropbox.com/">
+        </a>
+        <div class="maestro-nav__contents">
+            <ul class="maestro-nav__products">
+                <li data-reactid="16">
+                    <div class="maestro-nav__product-wrapper" data-reactid="17"><span class="ue-effect-container" data-reactid="18"><a href="https://www.dropbox.com/h?role=personal" class="maestro-nav__product maestro-nav__active-product" id="home" target="_self" rel="noopener" data-reactid="19"><!-- react-text: 20 -->Home<!-- /react-text --></a></span></div></li>
+                <li data-reactid="21"><div class="maestro-nav__product-wrapper" data-reactid="22"><span class="ue-effect-container" data-reactid="23"><a href="https://www.dropbox.com/home" class="maestro-nav__product" id="files" target="_self" rel="noopener" data-reactid="24"><!-- react-text: 25 -->Files<!-- /react-text --></a></span></div></li>
+                <li data-reactid="26"><div class="maestro-nav__product-wrapper" data-reactid="27"><span class="ue-effect-container" data-reactid="28"><a href="https://www.dropbox.com/paper?_tk=left_nav_paper&amp;role=personal" class="maestro-nav__product" id="paper" target="_self" rel="noopener" data-reactid="29"><!-- react-text: 30 -->Paper<!-- /react-text --><span class="maestro-nav__product-badge" data-reactid="31">New</span></a></span></div></li>
+            </ul>
+        </div>
+    </div>
+    
+
+<header class="maestro-header page-header__shadow">
+    <div class="mc-vertically-fixed page-header" style="margin-left: 0px;">
+        <div class="page-header__title" tabindex="0">
+            <h1 class="page-header__heading">Home</h1>
+        </div>
+        <div class="top-menu-container "><div class="search-bar--container u-l-fr"><div class="search-bar">
+            </div></header>
+
+
+
+<main class="maestro-app">
+    <div class="maestro-app-content" tabindex="5">
+        <div class="home">
+            <main class="home-access" role="main"><ul class="home-access-sections">
+                <li class="home-access-section"><!-- react-empty: 15 --></li>
+                <li class="home-access-section">
+                    <div class="starred"><h2 class="home-access-section__header">
+                        <div class="home-access-section__title">
+                            <div class="home-access-section__title-text">
+                                <div class="ue-effect-container">Starred</div></div></div></h2>
+                        <ul class="starred-list">
+                            <li class="starred-item"><span class="starred-item__file-icon"><span class="mc-tertiary-link-button-content"><span class="mc-tertiary-icon-wrapper"><svg width="32" height="32" viewBox="0 0 32 32" class="mc-icon-template-actionable"><title>action-new-shared-folder</title><g fill="none" fill-rule="evenodd"><div class="ue-effect-container">New shared folder</div></span></span></button></li></ul></div></div></div><div></div></div></div></main>
+

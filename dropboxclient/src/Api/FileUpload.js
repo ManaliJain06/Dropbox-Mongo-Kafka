@@ -48,8 +48,11 @@ export const createDirectory = (payload) => {
         });
 };
 
-export const getFiles = (payload) => {
-    return axios.post('http://localhost:3003/getFiles', payload
+export const getFiles = () => {
+    const token = sessionStorage.jwtToken;
+    return axios.get('http://localhost:3003/getFiles', {
+        headers: { 'authorization': token }
+        }
     )
         .then(function (response) {
             console.log(response);

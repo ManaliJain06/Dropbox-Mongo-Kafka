@@ -16,6 +16,9 @@ import * as API from '../Api/UserLogin';
 class UserHome extends Component {
     constructor(props){
         super(props);
+        this.state ={
+            "isUpdated" : false
+        }
     }
     handleSignout = () => {
         API.signout()
@@ -28,7 +31,17 @@ class UserHome extends Component {
                 }
             });
     }
-
+    // myCallbackForHome=(callHome)=> {
+    //     console.log("reached callback");
+    //     this.props.userMenu('home');
+    //     this.setState({
+    //         "isUpdated" : true
+    //      }, this.CallHomeOnUpdation);
+    // }
+    // CallHomeOnUpdation =()=> {
+    //     var switchDecision =null;
+    //     switchDecision = <Home/>;
+    // }
     render() {
         let switchDecision = null;
         if(this.props.userMenuSelection.menuSelection === 'home'){
@@ -108,39 +121,6 @@ class UserHome extends Component {
 
                     </div>
 
-
-                    {/*<div clasName="maestro-chrome">*/}
-                        {/*<header className="maestro-header page-header__shadow">*/}
-                            {/*<div className="mc-vertically-fixed page-header">*/}
-                                {/*<div className="page-header__title" tabindex="0">*/}
-                                    {/*<h1 className="page-header__heading">Home</h1>*/}
-                                {/*</div>*/}
-                                {/*<div className="top-menu-container ">*/}
-                                {/*</div>*/}
-                            {/*</div>*/}
-                        {/*</header>*/}
-                        {/*<div className="maestro-nav__container">*/}
-                            {/*<div className="maestro-nav__panel">*/}
-                                {/*<div className="maestro-nav__contents">*/}
-                                    {/*<ul className="maestro-nav__products">*/}
-                                        {/*<li>*/}
-                                            {/*<div className="maestro-nav__product-wrapper"><span*/}
-                                                {/*class="ue-effect-container"><a*/}
-                                                {/*href="https://www.dropbox.com/h?role=personal">Home</a></span></div>*/}
-                                        {/*</li>*/}
-                                        {/*<li >*/}
-                                            {/*<div class="maestro-nav__product-wrapper"><span class="ue-effect-container"><a*/}
-                                                {/*href="https://www.dropbox.com/h?role=personal">About</a></span></div>*/}
-                                        {/*</li>*/}
-                                        {/*<li >*/}
-                                            {/*<div class="maestro-nav__product-wrapper"><span class="ue-effect-container"><a*/}
-                                                {/*href="https://www.dropbox.com/h?role=personal">Home</a></span></div>*/}
-                                        {/*</li>*/}
-                                    {/*</ul>*/}
-                                {/*</div>*/}
-                            {/*</div>*/}
-                        {/*</div>*/}
-                    {/*</div>*/}
                 </div>
             </div>
         );

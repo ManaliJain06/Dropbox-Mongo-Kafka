@@ -38,3 +38,10 @@ export const aboutUpdate = (about) => {
         about
     }
 }
+
+export const userFiles = (payload) => {
+    return {
+        type: "USER_FILE",
+        payload
+    }
+}

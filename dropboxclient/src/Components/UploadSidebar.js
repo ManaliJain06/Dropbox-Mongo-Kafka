@@ -53,7 +53,7 @@ class UploadSidebar extends Component{
         API.uploadFile(payload)
             .then((res) => {
                 if (res.status === 200) {
-
+                    this.props.callHome('home');
                 } else {
                     alert("Error in file upload");
                 }
@@ -91,7 +91,6 @@ class UploadSidebar extends Component{
 }
 function mapStateToProps(state) {
     return{
-        userMenuSelection: state.userMenu,
         loginDataProp : state.loginData
     };
 

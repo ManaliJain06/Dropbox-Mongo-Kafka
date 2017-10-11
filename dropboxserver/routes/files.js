@@ -17,6 +17,8 @@ const storage = multer.diskStorage({
         let uuidv4 = uuid();
         console.log(uuidv4);
         insertFile(file,sessionMgmt.user_uuid,uuidv4);
+        // var path = path.join(__dirname, "/../public") + Date.now()+file.originalname;
+        // console.log(path);
         callback(null, path.join(__dirname, "/../public"))
     },
     filename: function (req, file, callback) {
@@ -55,15 +57,15 @@ insertFile = function (file, user_uuid, uuidv4) {
 
     var file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
-    let insertFileQuery = "insert into file(file_uuid,file,file_created,file_name,file_type,user_uuid) values ('"
+    let insertFileQuery = "insert into file(file_uuid,file,file_created,file_name,file_type,user_uuid,isInDirectory) values ('"
         + uuidv4 + "','" + file + "','" + file_created_timestamp + "','" + file.originalname + "','"
-        + file.mimetype + "','" +  user_uuid + "');";
+        + file.mimetype + "','" +  user_uuid + "', '0');";
     console.log("query:", insertFileQuery);
 
-    let mappingFile_User = "insert into file_dir_user(file_uuid,user_uuid) values ('"
-        + uuidv4 + "','" + user_uuid +"');";
-
-    console.log("query:", mappingFile_User);
+    // let mappingFile_User = "insert into file_dir_user(file_uuid,user_uuid) values ('"
+    //     + uuidv4 + "','" + user_uuid +"');";
+    //
+    // console.log("query:", mappingFile_User);
     // let mapping_star = "update directory set star_id='yes' where  dir_uuid = '"+req.body.dir_uuid+"' " +
     //     "AND dir_name = '"+req.body.dir_name+"' AND user_uuid = '"+req.body.user_uuid+"';";
     // console.log(mapping_star);
@@ -71,12 +73,6 @@ insertFile = function (file, user_uuid, uuidv4) {
     mysqlConnection.userSignup(insertFileQuery, function (err, result) {
         if (err) {
             throw err;
-        } else if (result.affectedRows > 0) {
-            mysqlConnection.userSignup(mappingFile_User, function (err, result1) {
-                if (err) {
-                    throw err;
-                }
-            });
         }
     });
 };

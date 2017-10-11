@@ -59,7 +59,7 @@ app.use('/files',sessionManagement.verifyToken, files.saveFile);
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
 app.post('/createDirectory', directory.createDirectory);
 app.post('/deleteDirectory', directory.deleteDirectory);
-app.post('/getFiles', directory.getFiles);
+app.get('/getFiles',sessionManagement.verifyToken, directory.getFiles);
 
 app.post('/starDirectory', directory.starDir_files);
 // res.render('admin.html');
