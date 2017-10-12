@@ -31,12 +31,31 @@ export const uploadFile = (payload) => {
     });
 }
 
+export const uploadInDir = (payload) => {
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
+    console.log("recahde");
+    return axios.post('http://localhost:3003/uploadFileInDir', payload, {
+            headers: { 'authorization': token }
+        }
+    )
+        .then(function (response) {
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};
 
 export const createDirectory = (payload) => {
-    // const token = sessionStorage.jwtToken;
-    // console.log("token",token);
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
     console.log("recahde");
-    return axios.post('http://localhost:3003/createDirectory', payload
+    return axios.post('http://localhost:3003/createDirectory', payload, {
+        headers: { 'authorization': token }
+        }
     )
         .then(function (response) {
             console.log(response);

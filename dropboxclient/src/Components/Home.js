@@ -68,7 +68,7 @@ class Home extends Component{
                                 <FilesList
                                     key={index}
                                     file={item}
-                                    // additem={this.myCallbackFOrOrder}
+                                    callHome={this.myCallbackForHome}
                                 />
                             );
                         })

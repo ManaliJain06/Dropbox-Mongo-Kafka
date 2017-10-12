@@ -10,20 +10,23 @@ var moment = require('moment');
 var sessionMgmt = require('./sessionManagement');
 var mysqlConnection = require('./mysqlConnector');
 
+const uuidv4 = uuid();
+console.log(uuidv4);
+
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
         console.log(file);
-        // console.log("variable is", sessionMgmt.user_uuid);
-        let uuidv4 = uuid();
-        console.log(uuidv4);
-        insertFile(file,sessionMgmt.user_uuid,uuidv4);
-        // var path = path.join(__dirname, "/../public") + Date.now()+file.originalname;
-        // console.log(path);
+        // http://localhost:3003/1507751921274Resume_Manali_Jain.pdf
         callback(null, path.join(__dirname, "/../public"))
     },
     filename: function (req, file, callback) {
+
         console.log("filename", file.originalname);
-        callback(null, Date.now()+file.originalname)
+        let filename = Date.now() + file.originalname;
+        let filePath = "http://localhost:3003/" + filename;
+        insertFile(file, filePath,sessionMgmt.user_uuid, uuidv4);
+        callback(null, filename);
+
     }
 });
 
@@ -33,8 +36,8 @@ exports.saveFile = function (req,res) {
     upload(req, res, function (err) {
         if(err){
             console.log(err);
-            var msg = "Error occured";
-            var jsonResponse = {
+            let msg = "Error occured";
+            let jsonResponse = {
                 "statusCode": 500,
                 "result": "error",
                 "message": msg
@@ -42,24 +45,25 @@ exports.saveFile = function (req,res) {
             res.send(jsonResponse);
         }else{
            console.log("From save file: ")
-            var msg = "saved successfully";
-            var jsonResponse = {
-                "statusCode": 201,
-                "result": "Success",
-                "message": msg
-            };
-            res.send(jsonResponse);
+            // let msg = "saved successfully";
+            // let jsonResponse = {
+            //     "statusCode": 201,
+            //     "result": "Success",
+            //     "message": msg
+            // };
+            // res.send(jsonResponse);
+            res.status(201).json({file_uuid : uuidv4});
         }
     })
 };
 
-insertFile = function (file, user_uuid, uuidv4) {
+insertFile = function (file, filePath, user_uuid, uuidv4) {
 
     var file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
-    let insertFileQuery = "insert into file(file_uuid,file,file_created,file_name,file_type,user_uuid,isInDirectory) values ('"
-        + uuidv4 + "','" + file + "','" + file_created_timestamp + "','" + file.originalname + "','"
-        + file.mimetype + "','" +  user_uuid + "', '0');";
+    let insertFileQuery = "insert into file(file_uuid,file_created,file_name,file_type,user_uuid,isInDirectory," +
+        "star_id,file_path) values ('" + uuidv4 + "','" + file_created_timestamp + "','" + file.originalname + "','"
+        + file.mimetype + "','" +  user_uuid + "', '0', '0', '" + filePath + "');";
     console.log("query:", insertFileQuery);
 
     // let mappingFile_User = "insert into file_dir_user(file_uuid,user_uuid) values ('"
@@ -71,6 +75,7 @@ insertFile = function (file, user_uuid, uuidv4) {
     // console.log(mapping_star);
 
     mysqlConnection.userSignup(insertFileQuery, function (err, result) {
+        console.log('RESULT Is', result);
         if (err) {
             throw err;
         }

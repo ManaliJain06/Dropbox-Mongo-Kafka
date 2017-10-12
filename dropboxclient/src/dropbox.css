@@ -510,3 +510,11 @@ a {
 .folder{
     background-color: #0070E0;
 }
+
+.image-wrapper-fileInDir{
+    background-image: url(Components/bluedot.jpg);
+    background-repeat: no-repeat;
+    width: 22px;
+    height: 16px;
+    /*padding-bottom: 65px;*/
+}

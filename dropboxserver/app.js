@@ -57,11 +57,12 @@ app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbo
 app.post("/signout", dropboxUser.signout);
 app.use('/files',sessionManagement.verifyToken, files.saveFile);
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
-app.post('/createDirectory', directory.createDirectory);
-app.post('/deleteDirectory', directory.deleteDirectory);
+app.post('/createDirectory',sessionManagement.verifyToken, directory.createDirectory);
+app.post('/deleteDir', sessionManagement.verifyToken, directory.deleteDirectory);
+app.post('/deleteFile', sessionManagement.verifyToken, directory.deleteFile);
 app.get('/getFiles',sessionManagement.verifyToken, directory.getFiles);
 
-app.post('/starDirectory', directory.starDir_files);
+app.post('/star', sessionManagement.verifyToken, directory.starDir_files);
 // res.render('admin.html');
 
 
