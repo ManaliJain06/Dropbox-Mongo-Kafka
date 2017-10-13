@@ -23,18 +23,33 @@ export const uploadFile = (payload) => {
         method: 'POST',
         headers: { 'authorization': token },
         body: payload
-    }).then(res => {
-        return res;
-    }).catch(error => {
-        console.log("This is error");
-        return error;
-    });
+    }).then(response =>
+        response.json().then(data => ({
+            data: data,
+            status: response.status
+        })
+        ).then(res => {
+            console.log("hjhjhjhjhjkkjhjhkj",res);
+            return res;
+        }))
 }
+
+// fetch(url).then(response =>
+//     response.json().then(data => ({
+//             data: data,
+//             status: response.status
+//         })
+//     ).then(res => {
+//         console.log(res);
+//     }).catch(error => {
+//         console.log("This is error");
+//         return error;
+//     })
+
 
 export const uploadInDir = (payload) => {
     const token = sessionStorage.jwtToken;
     console.log("token",token);
-    console.log("recahde");
     return axios.post('http://localhost:3003/uploadFileInDir', payload, {
             headers: { 'authorization': token }
         }
@@ -82,13 +97,3 @@ export const getFiles = () => {
             return error
         });
 };
-// export const uploadFile = (payload) =>
-//     fetch(`${api}/files/upload`, {
-//         method: 'POST',
-//         body: payload
-//     }).then(res => {
-//         return res.status;
-//     }).catch(error => {
-//         console.log("This is error");
-//         return error;
-//     });

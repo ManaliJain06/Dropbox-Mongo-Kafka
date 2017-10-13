@@ -10,8 +10,7 @@ var moment = require('moment');
 var sessionMgmt = require('./sessionManagement');
 var mysqlConnection = require('./mysqlConnector');
 
-const uuidv4 = uuid();
-console.log(uuidv4);
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
@@ -22,18 +21,22 @@ const storage = multer.diskStorage({
     filename: function (req, file, callback) {
 
         console.log("filename", file.originalname);
+        let uuidv4 = uuid();
+        console.log(uuidv4);
         let filename = Date.now() + file.originalname;
         let filePath = "http://localhost:3003/" + filename;
         insertFile(file, filePath,sessionMgmt.user_uuid, uuidv4);
+        req.file_uuid = uuidv4;
         callback(null, filename);
-
     }
-});
+}
+);
 
 const upload = multer({ storage: storage }).single('file');
 
 exports.saveFile = function (req,res) {
     upload(req, res, function (err) {
+        console.log("file_uuid is jhjkgjkhjkhjhk", req.file_uuid);
         if(err){
             console.log(err);
             let msg = "Error occured";
@@ -42,7 +45,7 @@ exports.saveFile = function (req,res) {
                 "result": "error",
                 "message": msg
             };
-            res.send(jsonResponse);
+            res.status(500).json({jsonResponse});
         }else{
            console.log("From save file: ")
             // let msg = "saved successfully";
@@ -52,7 +55,7 @@ exports.saveFile = function (req,res) {
             //     "message": msg
             // };
             // res.send(jsonResponse);
-            res.status(201).json({file_uuid : uuidv4});
+            res.status(201).json({file_uuid : req.file_uuid});
         }
     })
 };
@@ -81,4 +84,67 @@ insertFile = function (file, filePath, user_uuid, uuidv4) {
         }
     });
 };
+
+exports.uploadFileInDir = function(req,res) {
+    let jsonResponse = {};
+
+    let fileDirMappingQuery = "insert into file_dir_user(dir_uuid,file_uuid,user_uuid) values (" +
+    "'" + req.body.dir_uuid + "','" + req.body.file_uuid + "','" + req.body.user_uuid + "');";
+    console.log(fileDirMappingQuery);
+
+    let fileUpdateQuery = "update file set isInDirectory='1' where  file_uuid = '"+req.body.file_uuid+"' " +
+        "AND user_uuid = '"+req.body.user_uuid+"';";
+    console.log(fileUpdateQuery);
+
+    let dirUpdateQuery = "update directory set hasFiles='1' where  dir_uuid = '"+req.body.dir_uuid+"' " +
+        "AND user_uuid = '"+req.body.user_uuid+"';";
+    console.log(dirUpdateQuery);
+
+
+    mysqlConnection.userSignup(fileDirMappingQuery, function (err, result1) {
+        console.log("inside forst");
+        if (err) {
+            var msg = "Error Occured. upload once again";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else {
+            mysqlConnection.userSignup(fileUpdateQuery, function (err, result2) {
+                console.log("inside second");
+                if (err) {
+                    var msg = "Error Occured";
+                    jsonResponse = {
+                        "statusCode": 500,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                } else {
+                    mysqlConnection.userSignup(dirUpdateQuery, function (err, result3) {
+                        console.log("inside third");
+                        if (err) {
+                            var msg = "Error Occured";
+                            jsonResponse = {
+                                "statusCode": 500,
+                                "result": "Error",
+                                "message": msg
+                            };
+                            res.send(jsonResponse);
+                        } else {
+                            jsonResponse = {
+                                "statusCode": 201,
+                                "result": "Success",
+                                "msg" : ''
+                            };
+                            res.send(jsonResponse);
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
 

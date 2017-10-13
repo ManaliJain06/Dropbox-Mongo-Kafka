@@ -2,11 +2,10 @@
  * Created by ManaliJain on 10/10/17.
  */
 import React, {Component} from 'react';
-import UploadSidebar from './UploadSidebar';
 import FilesInDir from './FilesInDir';
 import * as API from '../Api/FileOperations';
 import * as api from '../Api/FileUpload';
-import {loginData} from '../Actions/index';
+import {loginData,loginState} from '../Actions/index';
 import {connect} from 'react-redux';
 
 class FilesList extends Component{
@@ -20,46 +19,37 @@ class FilesList extends Component{
         }
     }
 
-    // mycallBackForDeleteFile = (deleteItem) =>{
-    //     // const file = this.props.file;
-    //     // this.setState({
-    //     //     ...this.state,
-    //     //     "file_uuid": file.filesArray[0].file_uuid,
-    //     //     "dir_name": file.dir_name,
-    //     //     "dir_uuid": file.dir_uuid,
-    //     // });
-    // }
+    myCallbackForDeleteFile = (callFileList) =>{
+        console.log("inside this hti thsi");
+        this.props.callHome('home');
+    }
+
     uploadFileInFolder = (event) => {
-        // const payload = new FormData();
-        // let user_uuid = this.state.user_uuid;
-        // payload.append('myfile', event.target.files[0]);
-        // payload.append('user_uuid', loginData.user_uuid);
-        //
-        // api.uploadFile(payload)
-        //     .then((res) => {
-        //         if (res.status === 200) {
-        //             this.setState({
-        //                 ...this.state,
-        //                 "file_uuid": file.filesArray[0].file_uuid,
-        //                 "dir_name": file.dir_name,
-        //                 "dir_uuid": file.dir_uuid,
-        //             }, this.callUploadInDirAPI);
-        //             this.props.callHome('home');
-        //         } else {
-        //             alert("Error in file upload");
-        //         }
-        //     });
+        const payload = new FormData();
+        payload.append('file', event.target.files[0]);
+        payload.append('user_uuid', loginData.user_uuid);
+
+        api.uploadFile(payload)
+            .then((res) => {
+                if (res.status === 201) {
+                    const file = this.props.file;
+                    this.setState({
+                        ...this.state,
+                        "file_uuid": res.data.file_uuid,
+                        "dir_name": file.dir_name,
+                        "dir_uuid": file.dir_uuid,
+                    }, this.callUploadInDirAPI);
+                } else {
+                    alert("Error in file upload");
+                }
+            });
     };
     callUploadInDirAPI = () => {
-        API.deleteFile(this.state)
+        api.uploadInDir(this.state)
             .then((res) => {
                 if (res.data.statusCode === 201) {
                     this.props.callHome('home');
                 } else if (res.data.statusCode === 500) {
-                    this.setState({
-                        message: res.data.message
-                    });
-                } else if(res.data.statusCode === 400) {
                     this.setState({
                         message: res.data.message
                     });
@@ -74,7 +64,6 @@ class FilesList extends Component{
             });
     }
     handleDeleteFile = () => {
-        console.log("selsected file is", file);
         const file = this.props.file;
         var payload = {
             "file_uuid": file.filesArray[0].file_uuid,
@@ -107,10 +96,9 @@ class FilesList extends Component{
             });
     }
     handleDeleteDir = () => {
-        console.log("selsected file is", file);
         const file = this.props.file;
         var payload = {
-            "file_uuid": file.filesArray,
+            "file": file.filesArray,
             "dir_name": file.dir_name,
             "dir_uuid": file.dir_uuid,
             "user_uuid": this.state.user_uuid
@@ -208,6 +196,8 @@ class FilesList extends Component{
                                 <FilesInDir
                                         key={index}
                                         fileListInDir={item}
+                                        file1 = {file}
+                                        callFileList={this.myCallbackForDeleteFile}
                                 />
                             );
                     });
@@ -229,7 +219,7 @@ class FilesList extends Component{
                                     <div className="side-buttons">
                                         <div className="upload-button">
                                             <div>Upload Files in Folder</div>
-                                            <input className="upload" type="file" name="myfile"
+                                            <input className="upload" type="file" name="file"
                                                    onChange={this.uploadFileInFolder}/>
                                         </div>
                                     </div>
@@ -297,8 +287,13 @@ function mapStateToProps(state) {
     return{
         loginDataProp : state.loginData
     };
-
-
 }
 
-export default connect(mapStateToProps, null)(FilesList);
+function mapDispatchToProps(dispatch) {
+    // return bindActionCreators({loginState:loginState},dispatch)
+    return {
+        loginState: (data) => dispatch(loginState(data))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(FilesList);

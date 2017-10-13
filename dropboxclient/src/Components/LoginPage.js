@@ -13,8 +13,8 @@ class LoginPage extends Component{
     constructor(props){
         super(props);
         this.state = {
-            isLoginClicked : false,
-            isSignupClicked : true
+            isLoginClicked : true,
+            isSignupClicked : false
         };
     }
     mycallbackForLogin=()=>{

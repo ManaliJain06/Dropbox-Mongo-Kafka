@@ -2,18 +2,63 @@
  * Created by ManaliJain on 10/10/17.
  */
 import React, {Component} from 'react';
-// import {
-//     BrowserRouter as Router,
-//     Link
-// } from 'react-router-dom'
+import * as API from '../Api/FileOperations';
+import {loginData,loginState} from '../Actions/index';
+import * as home from './Home';
+import {connect} from 'react-redux';
 
 class FilesInDir extends Component{
 
-    deleteFiles = (fileListInDir) => {
-        // this.props.deleteFile('fileListInDir')
+    constructor(props) {
+        super(props);
+        let loginData = this.props.loginDataProp;
+        this.state = {
+            "user_uuid" : loginData.user_uuid,
+            'message': ''
+        }
+    }
+
+    deleteFiles = () => {
+        const fileListInDir =  this.props.fileListInDir;
+        const file = this.props.file1;
+        let payload = {
+            "file": file.filesArray,
+            "dir_name": file.dir_name,
+            "dir_uuid": file.dir_uuid,
+            "user_uuid": this.state.user_uuid,
+            "file_uuid": fileListInDir.file_uuid,
+            "file_name": fileListInDir.file_name
+        }
+        this.callDeleteFileInDirAPI(payload);
+    }
+
+    callDeleteFileInDirAPI = (payload) => {
+        API.deleteFileInDir(payload)
+            .then((res) => {
+                if (res.data.statusCode === 201) {
+                    this.props.callFileList('home');
+                    console.log("file deleted");
+                } else if (res.data.statusCode === 500) {
+                    this.setState({
+                        message: res.data.message
+                    });
+                } else if(res.data.statusCode === 400) {
+                    this.setState({
+                        message: res.data.message
+                    });
+                } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
+                    alert("Token expired or invalid. Please login again");
+                    this.setState({
+                        message: res.data.message
+                    });
+                    sessionStorage.removeItem("jwtToken");
+                    this.props.loginState(false);
+                }
+            });
     }
     render() {
         const fileListInDir =  this.props.fileListInDir;
+
         // const dirName = this.props.dirName;
         return(
 
@@ -28,7 +73,7 @@ class FilesInDir extends Component{
                             </div>
                             <div className="starred-item__content col-sm-2">
                                 <button type="button" className="btn btn-btn-primary"
-                                        onClick = {this.deleteFiles('fileListInDir')}
+                                        onClick = {this.deleteFiles}
                                 >Delete</button>
                             </div>
                         </li>
@@ -37,5 +82,20 @@ class FilesInDir extends Component{
         );
     }
 }
-export default FilesInDir;
+
+function mapStateToProps(state) {
+    console.log("state App", state)
+    return{
+        loginDataProp : state.loginData
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    // return bindActionCreators({loginState:loginState},dispatch)
+    return {
+        loginState: (data) => dispatch(loginState(data))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(FilesInDir);
 

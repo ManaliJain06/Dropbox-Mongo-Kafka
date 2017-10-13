@@ -4,7 +4,7 @@
 import React, {Component} from 'react';
 import * as Validate from './validation';
 import * as API from '../Api/FileUpload';
-import {loginData} from '../Actions/index';
+import {loginData,loginState} from '../Actions/index';
 import {connect} from 'react-redux';
 class Folder extends Component{
 
@@ -120,8 +120,12 @@ function mapStateToProps(state) {
     return{
         loginDataProp : state.loginData
     };
-
-
+}
+function mapDispatchToProps(dispatch) {
+    // return bindActionCreators({loginState:loginState},dispatch)
+    return {
+        loginState: (data) => dispatch(loginState(data))
+    };
 }
 
-export default connect(mapStateToProps, null)(Folder);
+export default connect(mapStateToProps, mapDispatchToProps)(Folder);

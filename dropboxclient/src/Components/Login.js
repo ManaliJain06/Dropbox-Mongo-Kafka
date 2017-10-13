@@ -108,7 +108,7 @@ class Login extends Component{
                                     <input type="checkbox" name="terms" value="banks" required/> Remember me
                                 </div>
                                 <div className="col-sm-3">
-                                    <button type="button" className="btn btn-primary"
+                                    <button type="submit" className="btn btn-primary"
                                             onClick={this.handleSubmitForLogin}>Sign in</button>
                                 </div>
                             </div>

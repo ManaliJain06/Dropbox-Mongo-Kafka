@@ -55,11 +55,13 @@ app.post("/login", dropboxUser.userLoginData);
 // app.post("/postUserInterest", dropboxUser.postUserInterest);
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);
-app.use('/files',sessionManagement.verifyToken, files.saveFile);
+app.post('/files',sessionManagement.verifyToken, files.saveFile);
+app.post('/uploadFileInDir',sessionManagement.verifyToken, files.uploadFileInDir)
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
 app.post('/createDirectory',sessionManagement.verifyToken, directory.createDirectory);
 app.post('/deleteDir', sessionManagement.verifyToken, directory.deleteDirectory);
 app.post('/deleteFile', sessionManagement.verifyToken, directory.deleteFile);
+app.post('/deleteFileInDir', sessionManagement.verifyToken, directory.deleteFileInDir);
 app.get('/getFiles',sessionManagement.verifyToken, directory.getFiles);
 
 app.post('/star', sessionManagement.verifyToken, directory.starDir_files);

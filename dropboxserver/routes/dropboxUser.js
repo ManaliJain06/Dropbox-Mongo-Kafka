@@ -91,6 +91,8 @@ exports.userLoginData = function(req,res) {
     let jsonResponse ={};
     let email = req.body.data.email;
     let password  = req.body.data.password;
+    console.log(email);
+    console.log(password);
     let loginCredentials = "select * from User where email = '"+email+"';";
     console.log(loginCredentials);
     mysqlConnection.userSignup(loginCredentials, function(err,result){
@@ -102,7 +104,7 @@ exports.userLoginData = function(req,res) {
                 "message" : msg
             };
         } else {
-            console.log(result);
+            console.log("result is ",result);
             if(result.length > 0) {
                 bcrypt.compare(password, result[0].password).then(function (check) {
                     // check the response

@@ -6,7 +6,7 @@ import React, {Component} from 'react';
 import UploadSidebar from './UploadSidebar';
 import FilesList from './FilesList';
 import * as API from '../Api/FileUpload';
-import {loginData} from '../Actions/index';
+import {loginData,loginState} from '../Actions/index';
 import {userFiles} from '../Actions/index';
 
 import {connect} from 'react-redux';
@@ -26,7 +26,8 @@ class Home extends Component{
     myCallbackForHome=(callHome) => {
         // this.props.callHome(callHome);
         this.componentDidMount();
-}
+    };
+
     componentDidMount() {
         API.getFiles()
             .then((res) => {
@@ -118,7 +119,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     // return bindActionCreators({loginState:loginState},dispatch)
     return {
-        userFiles : (data) => dispatch(userFiles(data))
+        userFiles : (data) => dispatch(userFiles(data)),
+        loginState: (data) => dispatch(loginState(data))
     };
 }
 

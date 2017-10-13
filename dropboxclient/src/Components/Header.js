@@ -24,7 +24,7 @@ class Header extends Component{
                                     {/*<Link to="/signup">SignUp</Link>*/}
                                 {/*</Router>*/}
 
-                                <a href="/login" className="button-link" onClick={() => this.signupPage}>Sign in</a>
+                                {/*<a href="/login" className="button-link" onClick={() => this.signupPage}>Sign in</a>*/}
                             </div>
                         </div>
                     </div>

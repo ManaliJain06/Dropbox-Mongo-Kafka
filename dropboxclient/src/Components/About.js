@@ -232,8 +232,6 @@ function mapStateToProps(state) {
     return{
         loginDataProp : state.loginData
     };
-
-
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(About);

@@ -68,30 +68,65 @@ exports.deleteDirectory = function(req, res) {
     let jsonResponse = {};
 
     let deleteDir = "delete from directory where dir_name = '" + req.body.dir_name + "' AND " +
-        " AND user_uuid = '" + req.body.user_uuid + "'dir_uuid = '" + req.body.dir_uuid + "';";
-    console.log("query:", deleteDir);
-    console.log(deleteDir);
+        "user_uuid = '" + req.body.user_uuid + "' AND dir_uuid = '" + req.body.dir_uuid + "';";
 
+    console.log(deleteDir);
     let mapping_deleteDir = "delete from file_dir_user where user_uuid = '" + req.body.user_uuid + "' AND " +
         "dir_uuid = '" + req.body.dir_uuid + "';";
     console.log(mapping_deleteDir);
 
-    // Do this also
-    // let delete_Files_inside_directory =
+         mysqlConnection.userSignup(deleteDir, function (err, result) {
+            if (err) {
+                var msg = "Error Occured. delete once again";
+                jsonResponse = {
+                    "statusCode": 500,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            } else {
+                if (result.affectedRows > 0) {
 
-    mysqlConnection.userSignup(deleteDir, function (err, result) {
-        if (err) {
-            var msg = "Error Occured. delete once again";
-            jsonResponse = {
-                "statusCode": 500,
-                "result": "Error",
-                "message": msg
-            };
-            res.send(jsonResponse);
-        } else {
-            if (result.affectedRows > 0) {
-                mysqlConnection.userSignup(mapping_deleteDir, function (err, result1) {
-                    if (result1.affectedRows > 0) {
+                    if(req.body.file.length >0){
+                        mysqlConnection.userSignup(mapping_deleteDir, function (err, result1) {
+                            if (result1.affectedRows > 0) {
+
+                                for(let i =0;i< req.body.file.length ; i++){
+                                    let file_uuid = req.body.file[i].file_uuid;
+                                    let deleteFile = "delete from file where file_uuid = '" + file_uuid + "' AND " +
+                                        "user_uuid = '" + req.body.user_uuid + "';";
+                                    mysqlConnection.userSignup(deleteFile, function (err, result) {
+                                        if (err) {
+                                            let msg = "Error Occured. delete once again";
+                                            jsonResponse = {
+                                                "statusCode": 500,
+                                                "result": "Error",
+                                                "message": msg
+                                            };
+                                            res.send(jsonResponse);
+                                        }
+                                    });
+                                }
+
+                                var msg = "Directory deleted";
+                                jsonResponse = {
+                                    "statusCode": 201,
+                                    "result": "Success",
+                                    "data" : result1[0],
+                                    "message": msg
+                                };
+                                res.send(jsonResponse);
+                            } else {
+                                var msg = "Error Occured";
+                                jsonResponse = {
+                                    "statusCode": 400,
+                                    "result": "Error",
+                                    "message": msg
+                                };
+                                res.send(jsonResponse);
+                            }
+                        });
+                    } else {
                         var msg = "Directory deleted";
                         jsonResponse = {
                             "statusCode": 201,
@@ -100,19 +135,19 @@ exports.deleteDirectory = function(req, res) {
                             "message": msg
                         };
                         res.send(jsonResponse);
-                    } else {
-                        var msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
                     }
-                });
+
+                } else {
+                    var msg = "Error Occured";
+                    jsonResponse = {
+                        "statusCode": 400,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                }
             }
-        }
-    });
+        });
 }
 
 exports.deleteFile = function(req,res) {
@@ -299,7 +334,7 @@ exports.getFiles = function(req, res) {
     });
 }
 
-var getAllFiles = function(result) {
+getAllFiles = function(result) {
 
         let json = {};
         let files = [];
@@ -369,10 +404,11 @@ getFilesAndDirectory = function(result) {
                 array.push(filejson1);
 
                 filesDir[j].filesArray = array;
-
+                break;
                 // result.splice(i,1);
                 // i = i-1;
             }
+            flag = true;
         }
 
         if (flag) {
@@ -398,7 +434,81 @@ getFilesAndDirectory = function(result) {
     return filesDir;
 }
 
+exports.deleteFileInDir = function(req,res) {
+    let jsonResponse = {};
 
+    let deleteFileQuery = "delete from file where file_uuid = '" + req.body.file_uuid + "' AND " +
+        "user_uuid = '" + req.body.user_uuid + "';";
+    console.log("query:", deleteFileQuery);
+
+    let mapping_deleteDirQuery = "delete from file_dir_user where file_uuid = '"+ req.body.file_uuid + "' and " +
+    "user_uuid = '" + req.body.user_uuid + "' AND dir_uuid = '" + req.body.dir_uuid + "';";
+
+    console.log("query:", mapping_deleteDirQuery);
+
+    mysqlConnection.userSignup(deleteFileQuery, function (err, result) {
+        if (err) {
+            let msg = "Error Occured. delete once again";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else {
+            if (result.affectedRows > 0) {
+                mysqlConnection.userSignup(mapping_deleteDirQuery, function (err, result1) {
+                    if (result1.affectedRows > 0) {
+
+                        if(req.body.file.length === 1) {
+                            let updateFileQuery = "update directory set hasFiles='0' where  dir_uuid = '"+req.body.dir_uuid+"' " +
+                                "AND user_uuid = '"+req.body.user_uuid+"';";
+                            console.log("query:", updateFileQuery);
+                            mysqlConnection.userSignup(updateFileQuery, function (err, result) {
+                                if (err) {
+                                    let msg = "Error Occured. delete once again";
+                                    jsonResponse = {
+                                        "statusCode": 500,
+                                        "result": "Error",
+                                        "message": msg
+                                    };
+                                    res.send(jsonResponse);
+                                }
+                            });
+                        }
+                        var msg = "Directory deleted";
+                        jsonResponse = {
+                            "statusCode": 201,
+                            "result": "Success",
+                            "data" : result1[0],
+                            "message": msg
+                        };
+                        res.send(jsonResponse);
+                    } else {
+                        var msg = "Error Occured";
+                        jsonResponse = {
+                            "statusCode": 400,
+                            "result": "Error",
+                            "message": msg
+                        };
+                        res.send(jsonResponse);
+                    }
+                });
+            } else {
+                var msg = "File deleted";
+                jsonResponse = {
+                    "statusCode": 201,
+                    "result": "Success",
+                    "data" : result[0],
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            }
+
+        }
+    });
+
+}
 // var willIGetNewPhone = new Promise(
 //     function (resolve, reject) {
 //         if (isMomHappy) {
