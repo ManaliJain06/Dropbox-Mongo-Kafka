@@ -10,7 +10,7 @@ import Home from './Home';
 import About from './About';
 import Interest from './Interest';
 import Folder from './Folder';
-import Files from './Files';
+import Groups from './Groups';
 import * as API from '../Api/UserLogin';
 
 class UserHome extends Component {
@@ -53,8 +53,8 @@ class UserHome extends Component {
         if(this.props.userMenuSelection.menuSelection === 'interest'){
             switchDecision = <Interest/>;
         }
-        if(this.props.userMenuSelection.menuSelection === 'files'){
-            switchDecision = <Files/>;
+        if(this.props.userMenuSelection.menuSelection === 'groups'){
+            switchDecision = <Groups/>;
         }
         if(this.props.userMenuSelection.menuSelection === 'folder'){
             switchDecision = <Folder/>;
@@ -91,11 +91,11 @@ class UserHome extends Component {
                                     </span>
                                 </div>
                             </li>
-                            <li onClick = {() => this.props.userMenu('files')}>
+                            <li onClick = {() => this.props.userMenu('groups')}>
                                 <div className="maestro-nav__product-wrapper">
                                     <span className="ue-effect-container">
                                         <a href="#" className="maestro-nav__product">
-                                     Files</a>
+                                     Groups</a>
                                     </span>
                                 </div>
                             </li>

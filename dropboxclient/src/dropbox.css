@@ -518,3 +518,7 @@ a {
     height: 16px;
     /*padding-bottom: 65px;*/
 }
+
+.star {
+    text-decoration-color: #0070E0;
+}

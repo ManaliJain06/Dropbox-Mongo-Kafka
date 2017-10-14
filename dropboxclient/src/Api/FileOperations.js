@@ -78,3 +78,39 @@ export const deleteFileInDir = (payload) => {
             return error
         });
 };
+
+export const shareFile = (payload) => {
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
+    return axios.post('http://localhost:3003/shareFile', payload, {
+            headers: { 'authorization': token }
+        }
+    )
+        .then(function (response) {
+            console.log("cookie: ",document.cookie);
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};
+
+export const shareDir = (payload) => {
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
+    return axios.post('http://localhost:3003/shareDir', payload, {
+            headers: { 'authorization': token }
+        }
+    )
+        .then(function (response) {
+            console.log("cookie: ",document.cookie);
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};

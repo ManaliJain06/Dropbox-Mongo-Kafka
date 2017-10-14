@@ -2,7 +2,7 @@
  * Created by ManaliJain on 9/29/17.
  */
 var mysql = require('mysql');
-function getConnection(){
+function A(){
     var pool = mysql.createPool({
         host     : 'localhost',
         user     : 'root',

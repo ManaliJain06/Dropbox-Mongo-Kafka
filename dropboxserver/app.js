@@ -63,7 +63,8 @@ app.post('/deleteDir', sessionManagement.verifyToken, directory.deleteDirectory)
 app.post('/deleteFile', sessionManagement.verifyToken, directory.deleteFile);
 app.post('/deleteFileInDir', sessionManagement.verifyToken, directory.deleteFileInDir);
 app.get('/getFiles',sessionManagement.verifyToken, directory.getFiles);
-
+app.post('/shareFile',sessionManagement.verifyToken, directory.shareFile);
+app.post('/shareDir',sessionManagement.verifyToken, directory.shareDir);
 app.post('/star', sessionManagement.verifyToken, directory.starDir_files);
 // res.render('admin.html');
 

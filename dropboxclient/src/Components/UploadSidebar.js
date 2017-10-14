@@ -74,7 +74,8 @@ class UploadSidebar extends Component{
                 </form>
 
                 <div className="side-buttons">
-                    <button className="btn btn-primary btn-sm mc-button-primary">
+                    <button className="btn btn-primary btn-sm mc-button-primary"
+                            onClick = {() => this.props.userMenu('groups')}>>
                         New shared folder
                     </button>
                 </div>

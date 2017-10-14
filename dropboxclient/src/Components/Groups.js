@@ -3,7 +3,7 @@
  */
 import React, {Component} from 'react';
 
-class Files extends Component{
+class Groups extends Component{
 
     render() {
 
@@ -12,4 +12,4 @@ class Files extends Component{
         );
     }
 }
-export default Files;
+export default Groups;

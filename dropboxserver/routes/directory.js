@@ -268,6 +268,10 @@ exports.getFiles = function(req, res) {
         " left join directory d on fdr.dir_uuid = d.dir_uuid where fdr.user_uuid = '" + sessionMgmt.user_uuid + "' " +
         " and f.isInDirectory = '1' and d.hasFiles = '1';";
 
+    let sharedFileArray = [];
+    let SharedFileQuery = "select s.file_uuid, s.shareByUserId, f.file_name, s.file_uuid, f.file_path, f.file_created from share_file s " +
+        "left outer join file f on s.file_uuid = f.file_uuid where s.shareToUserId = '" + sessionMgmt.user_uuid + "';";
+
 
     var files = [];
 
@@ -282,9 +286,9 @@ exports.getFiles = function(req, res) {
             };
             res.send(jsonResponse);
         } else {
-            console.log("files are",result1);
+            console.log("files are", result1);
             filesArray = getAllFiles(result1);
-            mysqlConnection.userSignup(getDirQuery, function (err, result2) {
+            mysqlConnection.userSignup(SharedFileQuery, function (err, result2) {
                 if (err) {
                     var msg = "Error Occured. Create once again";
                     jsonResponse = {
@@ -294,9 +298,9 @@ exports.getFiles = function(req, res) {
                     };
                     res.send(jsonResponse);
                 } else {
-                    console.log("directories are",result2);
-                    dirArray = getAllDirectory(result2);
-                    mysqlConnection.userSignup(fileDirQuery, function (err, result3) {
+                    console.log(" shared files are",result2);
+                    sharedFileArray = getAllShareFiles(result2,sessionMgmt.user_uuid);
+                    mysqlConnection.userSignup(getDirQuery, function (err, result3) {
                         if (err) {
                             var msg = "Error Occured. Create once again";
                             jsonResponse = {
@@ -306,26 +310,43 @@ exports.getFiles = function(req, res) {
                             };
                             res.send(jsonResponse);
                         } else {
-                            console.log("files an dir are",result3);
-                            fileDirArray = getFilesAndDirectory(result3);
-                            if(filesArray!== undefined){
-                                files = files.concat(filesArray);
-                            }
-                            if(dirArray!== undefined){
-                                files = files.concat(dirArray);
-                            }
-                            if(fileDirArray !== undefined){
-                                files = files.concat(fileDirArray);
-                            }
-                            // files = files.concat(filesArray, dirArray, fileDirArray);
-                            jsonResponse = {
-                                "statusCode": 201,
-                                "result": "Success",
-                                "files" : files,
-                                "msg" : ''
-                            };
-                            console.log("final array", files);
-                            res.send(jsonResponse);
+                            console.log("directories are",result3);
+                            dirArray = getAllDirectory(result3);
+                            mysqlConnection.userSignup(fileDirQuery, function (err, result4) {
+                                if (err) {
+                                    var msg = "Error Occured. Create once again";
+                                    jsonResponse = {
+                                        "statusCode": 500,
+                                        "result": "Error",
+                                        "message": msg
+                                    };
+                                    res.send(jsonResponse);
+                                } else {
+                                    console.log("files an dir are",result4);
+                                    fileDirArray = getFilesAndDirectory(result4);
+                                    if(filesArray!== undefined){
+                                        files = files.concat(filesArray);
+                                    }
+                                    if(sharedFileArray!== undefined){
+                                        files = files.concat(sharedFileArray);
+                                    }
+                                    if(dirArray!== undefined){
+                                        files = files.concat(dirArray);
+                                    }
+                                    if(fileDirArray !== undefined){
+                                        files = files.concat(fileDirArray);
+                                    }
+                                    // files = files.concat(filesArray, dirArray, fileDirArray);
+                                    jsonResponse = {
+                                        "statusCode": 201,
+                                        "result": "Success",
+                                        "files" : files,
+                                        "msg" : ''
+                                    };
+                                    console.log("final array", files);
+                                    res.send(jsonResponse);
+                                }
+                            });
                         }
                     });
                 }
@@ -362,6 +383,42 @@ getAllFiles = function(result) {
             files.push(json);
         }
         console.log("file json", files);
+    return files;
+}
+
+getAllShareFiles = function(result, current_user){
+    let json = {};
+    let files = [];
+
+    for (let i = 0; i < result.length; i++) {
+        let filesArray = [];
+        let canDelete = false;
+        if(current_user === result[i].shareByUserId){
+            canDelete = true;
+        }
+
+        if (result[i].file_name !== null) {
+            let filejson = {
+                "file_name": result[i].file_name,
+                "file_created": result[i].file_created,
+                "file_path": result[i].file_path,
+                "file_uuid": result[i].file_uuid
+            };
+            filesArray.push(filejson);
+        } else {
+            filesArray = [];
+        }
+        json = {
+            "dir_name": '',
+            "dir_uuid": '',
+            "dir_created": '',
+            "star_id": '',
+            "isOwner": canDelete,
+            "filesArray": filesArray
+        };
+        files.push(json);
+    }
+    console.log(" share file json", files);
     return files;
 }
 
@@ -509,46 +566,114 @@ exports.deleteFileInDir = function(req,res) {
     });
 
 }
-// var willIGetNewPhone = new Promise(
-//     function (resolve, reject) {
-//         if (isMomHappy) {
-//             var phone = {
-//                 brand: 'Samsung',
-//                 color: 'black'
-//             };
-//             resolve(phone); // fulfilled
-//         } else {
-//             var reason = new Error('mom is not happy');
-//             reject(reason); // reject
-//         }
-//
-//     }
-// );
-//
-// // call our promise
-// var askMom = function () {
-//     willIGetNewPhone
-//         .then(function (fulfilled) {
-//             // yay, you got a new phone
-//             console.log(fulfilled);
-//             // output: { brand: 'Samsung', color: 'black' }
-//         })
-//         .catch(function (error) {
-//             // oops, mom don't buy it
-//             console.log(error.message);
-//             // output: 'mom is not happy'
-//         });
-// };
-//
-// askMom();
 
-exports.uploadFileInDirecotry = function(req,res){
+exports.shareFile = function(req,res) {
+    let jsonResponse = {};
+    let file = req.body.file;
 
-    //use below queries to update
-    // insert into file_dir_user(dir_uuid,file_uuid,user_uuid) values
-    // ('e6a4b93a-ab03-4c57-8fb0-76e481869d5e','fc55d6b5-de53-48c3-8ad5-4e2a91e970e3','471e4924-4794-4f2c-b905-35a59a02382a');
-    //
-    // update file set isInDirectory = '1' where file_uuid = 'fc55d6b5-de53-48c3-8ad5-4e2a91e970e3';
-    // update directory set hasFiles = '1' where dir_uuid = 'e6a4b93a-ab03-4c57-8fb0-76e481869d5e';
-    //
+    let getUserIdToShare = "select user_uuid from user where email = '" + req.body.shareToEmail + "';";
+    mysqlConnection.userSignup(getUserIdToShare, function (err, result) {
+        if (err) {
+            var msg = "Error Occured";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else if(result.length === 0){
+            var msg = "User is not available in dropbox";
+            jsonResponse = {
+                "statusCode": 300,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        }else if(result.length >0){
+            let insertShareFile = "insert into share_file(file_uuid,shareToUserId,shareByUserId) values ('"
+                + file.filesArray[0].file_uuid + "','" + result[0].user_uuid + "','" + req.body.user_uuid + "');";
+            mysqlConnection.userSignup(insertShareFile, function (err, result) {
+                if (err) {
+                    var msg = "Share file failed";
+                    jsonResponse = {
+                        "statusCode": 500,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                } else {
+                    var msg = "Share file success";
+                    jsonResponse = {
+                        "statusCode": 201,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                }
+            });
+        }
+    });
+}
+
+exports.shareDir =function(req,res){
+    let jsonResponse = {};
+    let file = req.body.file;
+
+    let getUserIdToShare = "select user_uuid from user where email = '" + req.body.shareToEmail + "';";
+    mysqlConnection.userSignup(getUserIdToShare, function (err, result) {
+        if (err) {
+            var msg = "Error Occured";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else if(result.length === 0){
+            var msg = "User is not available in dropbox";
+            jsonResponse = {
+                "statusCode": 300,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        }else if(result.length >0){
+            if(file.filesArray.length > 0 ){
+                let i = 0;
+                for(let i = 0; i<file.filesArray.length ;i++){
+                    let insertShareDir = "insert into share_dir(dir_uuid,file_uuid,shareToUserId,shareByUserId) " +
+                        "values ('" + file.dir_uuid + "','" + file.filesArray[i].file_uuid+ "','" + result[0].user_uuid +
+                        "','" + req.body.user_uuid + "');";
+                    mysqlConnection.userSignup(insertShareDir, function (err, result1) {
+                        if (err) {
+                            var msg = "Share Folder failed";
+                            jsonResponse = {
+                                "statusCode": 500,
+                                "result": "Error",
+                                "message": msg
+                            };
+                            res.send(jsonResponse);
+                        }
+                    });
+                }
+                if(i === (file.filesArray.length - 1)) {
+                    var msg = "Share Folder success";
+                    jsonResponse = {
+                        "statusCode": 201,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                }
+            } else {
+                var msg = "Share Folder failed";
+                jsonResponse = {
+                    "statusCode": 500,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            }
+        }
+    });
 }
