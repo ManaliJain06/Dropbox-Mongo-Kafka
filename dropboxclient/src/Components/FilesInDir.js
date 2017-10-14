@@ -58,10 +58,21 @@ class FilesInDir extends Component{
     }
     render() {
         const fileListInDir =  this.props.fileListInDir;
-
+        const file = this.props.file1;
+        let canDelete =null;
+        let isOwner = file.isOwnerDir;
+        if(isOwner !== undefined){
+            if(isOwner === false){
+                canDelete = <div></div>;
+            }
+            else{
+                canDelete = <div className="options star" onClick={this.deleteFiles}><u>Delete</u></div>
+            }
+        } else{
+            canDelete = <div className="options star" onClick={this.deleteFiles}><u>Delete</u></div>
+        }
         // const dirName = this.props.dirName;
         return(
-
                     <div className ="row">
                         <li className="starred-item">
                             <div className="starred-item__content col-sm-1">
@@ -72,13 +83,10 @@ class FilesInDir extends Component{
                                    download> {fileListInDir.file_name}</a>
                             </div>
                             <div className="starred-item__content col-sm-2">
-                                <button type="button" className="btn btn-btn-primary"
-                                        onClick = {this.deleteFiles}
-                                >Delete</button>
+                                {canDelete}
                             </div>
                         </li>
                     </div>
-
         );
     }
 }

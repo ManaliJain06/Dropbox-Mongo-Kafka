@@ -73,7 +73,7 @@ class FilesList extends Component{
         API.shareDir(payload)
             .then((res) => {
                 if (res.data.statusCode === 201) {
-                    this.closeModal();
+                    this.closeModalDir();
                     // this.props.callHome('home');
                 } else if (res.data.statusCode === 500) {
                     this.setState({
@@ -110,7 +110,7 @@ class FilesList extends Component{
         API.shareFile(payload)
             .then((res) => {
                 if (res.data.statusCode === 201) {
-                    this.closeModal();
+                    this.closeModalFile();
                     this.props.callHome('home');
                 } else if (res.data.statusCode === 500) {
                     this.setState({
@@ -316,14 +316,14 @@ class FilesList extends Component{
             let isStar = file.star_id;
             let starred ='';
             if(isStar === '1'){
-                starred = <div className="star">Starred</div>;
+                starred = <div className="star-files">Starred</div>;
             } else if(isStar === ''){
                starred = <div></div>
             } else if(isStar === '0'){
                 starred = <div className="starred-item__content col-sm-1">
                     {/*<button type="button" className="btn btn-btn-primary"*/}
                             {/*onClick={this.handleStarItem}>Star</button>*/}
-                    <div className="star" onClick={this.handleStarItem} >Starred</div>
+                    <div className="star" onClick={this.handleStarItem}> <u>Star</u></div>
                 </div>
             }
 
@@ -337,12 +337,16 @@ class FilesList extends Component{
                     canShare = <div></div>;
                 }
                 else{
-                    canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
-                    canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
+                    // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
+                    canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
+                    // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
+                    canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
                 }
             } else{
-                canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
-                canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
+                // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
+                canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
+                // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
+                canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
             }
 
             //to decide whether user can delete and share directory
@@ -357,10 +361,11 @@ class FilesList extends Component{
                     uploadFileInDir =<div></div>;
                 }
                 else{
-                    canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+                    // canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+                    canDeleteDir = <div className="star" onClick={this.handleDeleteDir}><u>Delete</u></div>
                     // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
                     uploadFileInDir = <div className="side-buttons">
-                                         <div className="upload-button">
+                                         <div className="upload-button-dir">
                                              <div>Upload Files in Folder</div>
                                             <input className="upload" type="file" name="file"
                                             onChange={this.uploadFileInFolder}/>
@@ -368,10 +373,11 @@ class FilesList extends Component{
                                     </div>
                 }
             } else{
-                canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+                // canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+                canDeleteDir = <div className="star" onClick={this.handleDeleteDir}><u>Delete</u></div>
                 // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
                 uploadFileInDir = <div className="side-buttons">
-                                    <div className="upload-button">
+                                    <div className="upload-button-dir">
                                         <div>Upload Files in Folder</div>
                                         <input className="upload" type="file" name="file"
                                                onChange={this.uploadFileInFolder}/>
@@ -380,7 +386,8 @@ class FilesList extends Component{
             }
 
             if(file.filesArray.length>0 && isOwnerDir === undefined) {
-                canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
+                // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
+                canShareDir = <div className="star" onClick={this.openModalDir}><u>Share</u></div>
             } else{
                 canShareDir = <div></div>;
             }
@@ -408,14 +415,14 @@ class FilesList extends Component{
                             <li className="starred-item">
                                 <div className="image-wrapper-folder col-sm-1"></div>
 
-                                <div className="starred-item__content tarred-item__title col-sm-5">
+                                <div className="starred-item__content starred-item__title col-sm-5">
                                     {   file.dir_name}
-                                </div>
-                                <div className="starred-item__content col-sm-1">
-                                    {canShareDir}
                                 </div>
                                 <div className="starred-item__content col-sm-3">
                                     {uploadFileInDir}
+                                </div>
+                                <div className="starred-item__content col-sm-1">
+                                    {canShareDir}
                                 </div>
                                 <div className="starred-item__content col-sm-1">
                                     {starred}
@@ -425,7 +432,7 @@ class FilesList extends Component{
                                     {messageForShareDir}
                                     <h2>Share Folder</h2>
                                     <form>
-                                        <input type="email" className="form-control" placeholder="Email Id"
+                                        <input type="text" className="form-control" placeholder="Email Id"
                                                value={this.state.email}
                                                onChange={(event) => {
                                                    this.setState({...this.state,email: event.target.value});

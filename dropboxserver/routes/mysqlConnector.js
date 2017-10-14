@@ -2,8 +2,9 @@
  * Created by ManaliJain on 9/29/17.
  */
 var mysql = require('mysql');
-function A(){
+function getConnection(){
     var pool = mysql.createPool({
+        connectionLimit : 100,
         host     : 'localhost',
         user     : 'root',
         password : 'root',
@@ -18,7 +19,7 @@ function A(){
 exports.userSignup = function(mysqlQuery, callback){
     var pool=getConnection();
     console.log("Connection done..");
-    console.log(mysqlQuery);
+    // console.log(mysqlQuery);
     pool.getConnection(function(err,connection) {
     connection.query(mysqlQuery, function(err, rows) {
         if(err){
