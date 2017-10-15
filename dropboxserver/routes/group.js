@@ -31,7 +31,7 @@ exports.createGroup =function(req,res){
             var msg = "Group created";
             jsonResponse = {
                 "statusCode": 201,
-                "result": "Error",
+                "result": "success",
                 "message": msg
             };
             res.send(jsonResponse);
@@ -67,9 +67,7 @@ exports.getGroup = function(req,res) {
             res.send(jsonResponse);
         } else if(result.length > 0) {
             console.log(result);
-            let x = false;
 
-            Q.all([])
             Q.all([queryMembers(result),
                 queryFiles(result)])
                 .spread(function (queryMember, queryFile) {
@@ -85,13 +83,13 @@ exports.getGroup = function(req,res) {
                         "statusCode": 201,
                         "result": "Success",
                         "group": groups,
-                        "msg": ''
+                        "message": ''
                     };
                     console.log("final group", groups);
                     res.send(jsonResponse);
                 })
                 .catch(function(err){
-                    var msg = "Failed";
+                    let msg = "Failed";
                     jsonResponse = {
                         "statusCode": 500,
                         "result": "Error",
@@ -470,4 +468,72 @@ exports.deleteFileFromGroup = function(req,res){
             }
         }
     });
+}
+
+exports.deleteGroup = function(req,res){
+
+    let jsonResponse = {};
+
+    let deleteGroupFilesQuery = "delete from file_in_group where " +
+    "group_name = '" + req.body.group_name + "' AND group_uuid = '" + req.body.group_uuid + "';";
+    console.log("query:", deleteGroupFilesQuery);
+
+    let deleteGroupMembersQuery = "delete from groups where group_uuid = '" + req.body.group_uuid + "' AND " +
+        "group_name = '" + req.body.group_name+ "';";
+    console.log("query:", deleteGroupMembersQuery);
+
+
+    Q.all([deleteMembers(deleteGroupMembersQuery),
+        deleteFiles(deleteGroupFilesQuery)])
+        .spread(function (result1, result2) {
+
+            if(result1.affectedRows >0  && result2 !== undefined){
+                jsonResponse = {
+                    "statusCode": 201,
+                    "result": "Success",
+                    "msg": 'Group Successfully deleted'
+                };
+                res.send(jsonResponse);
+            } else {
+                jsonResponse = {
+                    "statusCode": 500,
+                    "result": "Error",
+                    "msg": 'Error Occured'
+                };
+                res.send(jsonResponse);
+            }
+        })
+        .catch(function(err){
+            let msg = "Failed";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "msg": msg
+            };
+            res.send(jsonResponse);
+        });
+}
+
+let deleteMembers = function(deleteGroupMembersQuery) {
+    let groupMem = Q.defer();
+    mysqlConnection.userSignup(deleteGroupMembersQuery, function (err, result1) {
+        if (err) {
+            groupMem.reject(err)
+        } else {
+            groupMem.resolve(result1);
+        }
+    });
+    return groupMem.promise;
+}
+
+let deleteFiles = function(deleteGroupFilesQuery) {
+    let groupfile = Q.defer();
+    mysqlConnection.userSignup(deleteGroupFilesQuery, function (err, result2) {
+        if (err) {
+            groupfile.reject(err)
+        } else {
+            groupfile.resolve(result2);
+        }
+    });
+    return groupfile.promise;
 }

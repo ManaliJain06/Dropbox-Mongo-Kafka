@@ -95,6 +95,7 @@ class Groups extends Component{
     componentDidMount() {
         API.getGroups()
             .then((res) => {
+            console.log("res of component did mount is",res);
                 if (res.data.statusCode === 201) {
                     this.setState({
                         message: res.data.message,
@@ -139,7 +140,7 @@ class Groups extends Component{
         }
         return(
             <div>
-                {this.state.message}
+                {/*{this.state.message}*/}
                 <div className="row">
                     <div className="form-group home-access-sections-groups">
                         <div className="col-sm-2">

@@ -1,7 +1,4 @@
 /**
- * Created by ManaliJain on 10/14/17.
- */
-/**
  * Created by ManaliJain on 10/10/17.
  */
 import React, {Component} from 'react';

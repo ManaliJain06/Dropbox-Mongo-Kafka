@@ -114,3 +114,21 @@ export const shareDir = (payload) => {
             return error
         });
 };
+
+export const shareLink = (payload) => {
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
+    return axios.post('http://localhost:3003/shareLink', payload, {
+            headers: { 'authorization': token }
+        }
+    )
+        .then(function (response) {
+            console.log("cookie: ",document.cookie);
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};

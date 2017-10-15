@@ -92,3 +92,21 @@ export const deleteFileFromGroup = (payload) => {
             return error
         });
 };
+
+export const deleteGroup = (payload) => {
+    const token = sessionStorage.jwtToken;
+    console.log("token", token);
+    return axios.post('http://localhost:3003/deleteGroup', payload, {
+            headers: {'authorization': token}
+        }
+    )
+        .then(function (response) {
+            console.log("cookie: ", document.cookie);
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};

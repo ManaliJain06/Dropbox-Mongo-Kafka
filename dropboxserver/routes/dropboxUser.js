@@ -6,6 +6,7 @@ var mysqlConnection = require('./mysqlConnector');
 var session = require('client-sessions');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+var sessionMgmt = require('./sessionManagement');
 // var app = require('../app');
 // var hash = require('./encryption').hash;
 
@@ -179,7 +180,7 @@ exports.userLoginData = function(req,res) {
 exports.signout = function(req,res)
 {
     //destroy the session
-    req.session.destroy();
+    // req.session.destroy();
     console.log('Session destroyed');
     var jsonResponse={
         "statusCode": 401
@@ -291,3 +292,37 @@ exports.postUserAbout = function(req,res) {
     });
 }
 
+exports.getLinks = function(req,res){
+    let jsonResponse = {};
+    let linkQuery = "select * from link where user_uuid = '" + sessionMgmt.user_uuid + "';";
+    console.log(linkQuery);
+    mysqlConnection.userSignup(linkQuery, function(err,result){
+        if(err){
+            var msg = "Error Occured";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+        } else {
+            if(result.length > 0){
+                var msg = "success";
+                jsonResponse = {
+                    "statusCode": 201,
+                    "result": "Success",
+                    "link" : result,
+                    "message" : msg
+                };
+                res.send(jsonResponse);
+            } else {
+                var msg = "Error Occured";
+                jsonResponse = {
+                    "statusCode": 400,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            }
+        }
+    });
+}

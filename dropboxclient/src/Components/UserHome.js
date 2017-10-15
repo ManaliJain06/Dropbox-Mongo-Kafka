@@ -8,6 +8,7 @@ import {connect} from 'react-redux';
 import {userMenu, loginState} from '../Actions/index';
 import Home from './Home';
 import About from './About';
+import Link from './Link';
 import Interest from './Interest';
 import Folder from './Folder';
 import Groups from './Groups';
@@ -56,8 +57,8 @@ class UserHome extends Component {
         if(this.props.userMenuSelection.menuSelection === 'groups'){
             switchDecision = <Groups/>;
         }
-        if(this.props.userMenuSelection.menuSelection === 'folder'){
-            switchDecision = <Folder/>;
+        if(this.props.userMenuSelection.menuSelection === 'link'){
+            switchDecision = <Link/>;
         }
 
         return (
@@ -96,6 +97,14 @@ class UserHome extends Component {
                                     <span className="ue-effect-container">
                                         <a href="#" className="maestro-nav__product">
                                      Groups</a>
+                                    </span>
+                                </div>
+                            </li>
+                            <li onClick = {() => this.props.userMenu('link')}>
+                                <div className="maestro-nav__product-wrapper">
+                                    <span className="ue-effect-container">
+                                        <a href="#" className="maestro-nav__product">
+                                     Shared Links</a>
                                     </span>
                                 </div>
                             </li>

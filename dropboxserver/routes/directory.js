@@ -761,3 +761,51 @@ exports.shareDir =function(req,res){
         }
     });
 }
+
+exports.shareLink = function(req,res){
+    let jsonResponse = {};
+    let file = req.body.file;
+
+    let getUserIdToShareLink = "select user_uuid from user where email = '" + req.body.shareToEmail + "';";
+    mysqlConnection.userSignup(getUserIdToShareLink, function (err, result) {
+        if (err) {
+            var msg = "Error Occured";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else if(result.length === 0){
+            var msg = "User is not available in dropbox";
+            jsonResponse = {
+                "statusCode": 300,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        }else if(result.length >0){
+            let insertShareLink = "insert into link(link,user_uuid) values ('"
+                + file.filesArray[0].file_path + "','" + result[0].user_uuid + "');";
+            mysqlConnection.userSignup(insertShareLink, function (err, result) {
+                if (err) {
+                    var msg = "Share link failed";
+                    jsonResponse = {
+                        "statusCode": 500,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                } else {
+                    var msg = "Share file success";
+                    jsonResponse = {
+                        "statusCode": 201,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                }
+            });
+        }
+    });
+}

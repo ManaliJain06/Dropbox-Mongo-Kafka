@@ -58,6 +58,36 @@ class GroupList extends Component{
         this.setState({deleteMember: false});
     }
 
+    handleDeleteGroup= () => {
+        const group =  this.props.group;
+        let deleteGroup = {
+            "group_name": group.group_name,
+            "group_uuid": group.group_uuid
+        }
+        this.callAPIForDeleteGroup(deleteGroup);
+    }
+
+    callAPIForDeleteGroup = (payload) => {
+        API.deleteGroup(payload)
+            .then((res) => {
+            console.log("res for delete group",res);
+                if (res.data.statusCode === 201) {
+                    this.props.callGroup('group');
+                } else if (res.data.statusCode === 500) {
+                    this.setState({
+                        message: res.data.message
+                    });
+                } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
+                    alert("Token expired or invalid. Please login again");
+                    this.setState({
+                        message: res.data.message
+                    });
+                    sessionStorage.removeItem("jwtToken");
+                    this.props.loginState(false);
+                }
+            });
+    }
+
     handleDeleteMember = () => {
         const group = this.props.group;
         var flag = true;
@@ -317,7 +347,7 @@ class GroupList extends Component{
                                     </form>
                                 </Modal>
                                 <div className="starred-item__content col-sm-2">
-                                    <div className="star" onClick={this.handleDeleteFile}><u>Delete Group</u></div>
+                                    <div className="star" onClick={this.handleDeleteGroup}><u>Delete Group</u></div>
                                 </div>
                             </li>
                         </div>

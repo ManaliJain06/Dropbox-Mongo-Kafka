@@ -40,3 +40,19 @@ export const saveAbout = (payload) => {
             return error
         });
 };
+
+export const getLinks = () => {
+    const token = sessionStorage.jwtToken;
+    return axios.get('http://localhost:3003/getLinks', {
+            headers: { 'authorization': token }
+        }
+    )
+        .then(function (response) {
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};

@@ -30,14 +30,19 @@ class FilesList extends Component{
             "user_uuid" : loginData.user_uuid,
             "modalIsOpenFile": false,
             'modalIsOpenDir' : false,
+            "modalShareLink" : false,
             "email": '',
             'message': '',
-            'messageForShareFile': ''
+            'messageForShareFile': '',
+            "messageForShareDir" :'',
+            'messageForShareLink': ''
         }
         this.openModalFile = this.openModalFile.bind(this);
         this.closeModalFile = this.closeModalFile.bind(this);
         this.openModalDir = this.openModalDir.bind(this);
         this.closeModalDir = this.closeModalDir.bind(this);
+        this.openModalShareLink = this.openModalShareLink.bind(this);
+        this.closeModalShareLink = this.closeModalShareLink.bind(this);
     }
 
     openModalFile() {
@@ -45,6 +50,9 @@ class FilesList extends Component{
     }
     openModalDir() {
         this.setState({modalIsOpenDir: true});
+    }
+    openModalShareLink() {
+        this.setState({modalShareLink: true});
     }
 
     afterOpenModal() {
@@ -57,6 +65,9 @@ class FilesList extends Component{
     }
     closeModalDir() {
         this.setState({modalIsOpenDir: false});
+    }
+    closeModalShareLink() {
+        this.setState({modalShareLink: false});
     }
     handleShareDir =()=> {
         const file = this.props.file;
@@ -77,12 +88,48 @@ class FilesList extends Component{
                     // this.props.callHome('home');
                 } else if (res.data.statusCode === 500) {
                     this.setState({
-                        messageForShareFile: res.data.message
+                        messageForShareDir: res.data.message
                     });
                     this.closeModalDir();
                 } else if(res.data.statusCode === 300) {
                     this.setState({
-                        messageForShareFile: res.data.message,
+                        messageForShareDir: res.data.message,
+                        email : ''
+                    });
+                } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
+                    alert("Token expired or invalid. Please login again");
+                    this.setState({
+                        message: res.data.message
+                    });
+                    sessionStorage.removeItem("jwtToken");
+                    this.props.loginState(false);
+                }
+            });
+    }
+    handleShareLink = () =>{
+        const file = this.props.file;
+        var sharelinkData = {
+            "shareToEmail" : this.state.email,
+            "file": file,
+            "user_uuid": this.state.user_uuid
+        }
+        this.callAPIForShareLink(sharelinkData);
+
+    }
+    callAPIForShareLink =(payload) => {
+        API.shareLink(payload)
+            .then((res) => {
+                if (res.data.statusCode === 201) {
+                    this.closeModalShareLink();
+                    // this.props.callHome('home');
+                } else if (res.data.statusCode === 500) {
+                    this.setState({
+                        messageForShareLink: res.data.message
+                    });
+                    this.closeModalShareLink();
+                } else if(res.data.statusCode === 300) {
+                    this.setState({
+                        messageForShareLink: res.data.message,
                         email : ''
                     });
                 } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
@@ -112,7 +159,7 @@ class FilesList extends Component{
             .then((res) => {
                 if (res.data.statusCode === 201) {
                     this.closeModalFile();
-                    this.props.callHome('home');
+                    // this.props.callHome('home');
                 } else if (res.data.statusCode === 500) {
                     this.setState({
                         messageForShareFile: res.data.message
@@ -294,7 +341,7 @@ class FilesList extends Component{
         let messageForShareFile =null;
         if(this.state.messageForShareFile !== ''){
             messageForShareFile = <div className="clearfix">
-                                    <div className="alert alert-info text-center" role="alert">{this.state.messageForShareFile}</div>
+                                    <div className="alert alert-info" role="alert">{this.state.messageForShareFile}</div>
                                 </div>;
         } else{
             messageForShareFile = <div></div>;
@@ -302,12 +349,22 @@ class FilesList extends Component{
 
         //for message on Modal(popup) for Dir
         let messageForShareDir =null;
-        if(this.state.messageForShareFile !== ''){
+        if(this.state.messageForShareDir !== ''){
             messageForShareDir = <div className="clearfix">
-                <div className="alert alert-info text-center" role="alert">{this.state.messageForShareFile}</div>
+                <div className="alert alert-info" role="alert">{this.state.messageForShareFile}</div>
             </div>;
         } else{
             messageForShareDir = <div></div>;
+        }
+
+        //for message on Modal(popup) for link
+        let messageForShareLink =null;
+        if(this.state.messageForShareLink !== ''){
+            messageForShareLink = <div className="clearfix">
+                <div className="alert alert-info" role="alert">{this.state.messageForShareLink}</div>
+            </div>;
+        } else{
+            messageForShareLink = <div></div>;
         }
 
         const file =  this.props.file;
@@ -332,6 +389,7 @@ class FilesList extends Component{
             //to decide whether user can delete and share file
             let canDelete =null;
             let canShare =null;
+            let canShareLink =null;
             let isOwner = file.isOwner;
             if(isOwner !== undefined){
                 if(isOwner === false){
@@ -343,12 +401,14 @@ class FilesList extends Component{
                     canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
                     // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
                     canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
+                    canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
                 }
             } else{
                 // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
                 canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
                 // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
                 canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
+                canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
             }
 
             //to decide whether user can delete and share directory
@@ -464,10 +524,33 @@ class FilesList extends Component{
                     <ul className="starred-list">
                         <div className ="row">
                             <li className="starred-item">
-                                <div className="starred-item__content col-sm-9">
+                                <div className="starred-item__content col-sm-7">
                                     <a href={file.filesArray[0].file_path}
                                        className="starred-item__title" download>{file.filesArray[0].file_name}</a>
                                 </div>
+                                <div className="starred-item__content col-sm-2">
+                                    {canShareLink}
+                                </div>
+                                <Modal isOpen={this.state.modalShareLink} onAfterOpen={this.afterOpenModal} onRequestClose={this.closeModalShareLink}
+                                       style={customStyles} contentLabel="Example Modal">
+                                    {messageForShareLink}
+                                    <h2>Share link</h2>
+                                    <h5>Either copy link to share or add email to share the link</h5>
+                                    <div className="alert alert-info" role="alert"><b><u>{file.filesArray[0].file_path}</u></b></div>
+                                    <form>
+                                        <input type="email" className="form-control" placeholder="Email Id"
+                                               value={this.state.email}
+                                               onChange={(event) => {
+                                                   this.setState({...this.state,email: event.target.value});
+                                               }}required/>
+                                        <br/>
+                                        <div className ="row">
+                                            <div className ="col-sm-8"></div>
+                                            <div className ="col-sm-2"><button className ="btn btn-info" onClick={this.closeModalShareLink}>close</button></div>
+                                            <div className ="col-sm-2"><button className ="btn btn-info" onClick={this.handleShareLink}>ShareLink</button></div>
+                                        </div>
+                                    </form>
+                                </Modal>
                                 <div className="starred-item__content col-sm-1">
                                     {canShare}
                                 </div>
@@ -478,6 +561,7 @@ class FilesList extends Component{
                                        style={customStyles} contentLabel="Example Modal">
                                     {messageForShareFile}
                                     <h2>Share File</h2>
+                                    <h5>Enter email to share file</h5>
                                     <form>
                                         <input type="email" className="form-control" placeholder="Email Id"
                                                value={this.state.email}

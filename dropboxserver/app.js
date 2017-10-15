@@ -57,6 +57,7 @@ app.post("/login", dropboxUser.userLoginData);
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
+app.get('/getLinks',sessionManagement.verifyToken, dropboxUser.getLinks);
 
 app.post('/files',sessionManagement.verifyToken, files.saveFile);
 app.post('/uploadFileInDir',sessionManagement.verifyToken, files.uploadFileInDir);
@@ -69,12 +70,14 @@ app.get('/getFiles',sessionManagement.verifyToken, directory.getFiles);
 app.post('/shareFile',sessionManagement.verifyToken, directory.shareFile);
 app.post('/shareDir',sessionManagement.verifyToken, directory.shareDir);
 app.post('/star', sessionManagement.verifyToken, directory.starDir_files);
+app.post('/shareLink', sessionManagement.verifyToken, directory.shareLink);
 
 app.post('/createGroup', sessionManagement.verifyToken, group.createGroup);
 app.post('/getGroup', sessionManagement.verifyToken, group.getGroup);
 app.post('/addMember', sessionManagement.verifyToken, group.addMember);
 app.post('/deleteMember', sessionManagement.verifyToken, group.deleteMember);
 app.post('/deleteFileFromGroup', sessionManagement.verifyToken, group.deleteFileFromGroup);
+app.post('/deleteGroup', sessionManagement.verifyToken, group.deleteGroup);
 
 app.post('/filesGroup',sessionManagement.verifyToken, files.saveFileGroup);
 app.post('/uploadFileInGroup',sessionManagement.verifyToken, files.uploadFileInGroup);
