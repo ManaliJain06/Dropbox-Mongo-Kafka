@@ -279,7 +279,7 @@ exports.getFiles = function(req, res) {
         " left join directory d on sd.dir_uuid = d.dir_uuid where sd.shareToUserId = '" + sessionMgmt.user_uuid + "';";
 
 
-    var files = [];
+    let files = [];
 
 
     mysqlConnection.userSignup(getFilesQuery, function (err, result1) {
@@ -461,7 +461,6 @@ getAllDirectory = function(result){
     console.log("dir json",dir);
     return dir;
 }
-
 
 getFilesAndDirectory = function(result) {
     console.log(result);

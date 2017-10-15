@@ -34,6 +34,7 @@ app.use(cors(corsOptions));
 var dropboxUser = require('./routes/dropboxUser');
 var directory= require('./routes/directory');
 var files = require('./routes/files');
+var group = require('./routes/group');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -55,9 +56,11 @@ app.post("/login", dropboxUser.userLoginData);
 // app.post("/postUserInterest", dropboxUser.postUserInterest);
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);
-app.post('/files',sessionManagement.verifyToken, files.saveFile);
-app.post('/uploadFileInDir',sessionManagement.verifyToken, files.uploadFileInDir)
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
+
+app.post('/files',sessionManagement.verifyToken, files.saveFile);
+app.post('/uploadFileInDir',sessionManagement.verifyToken, files.uploadFileInDir);
+
 app.post('/createDirectory',sessionManagement.verifyToken, directory.createDirectory);
 app.post('/deleteDir', sessionManagement.verifyToken, directory.deleteDirectory);
 app.post('/deleteFile', sessionManagement.verifyToken, directory.deleteFile);
@@ -66,8 +69,15 @@ app.get('/getFiles',sessionManagement.verifyToken, directory.getFiles);
 app.post('/shareFile',sessionManagement.verifyToken, directory.shareFile);
 app.post('/shareDir',sessionManagement.verifyToken, directory.shareDir);
 app.post('/star', sessionManagement.verifyToken, directory.starDir_files);
-// res.render('admin.html');
 
+app.post('/createGroup', sessionManagement.verifyToken, group.createGroup);
+app.post('/getGroup', sessionManagement.verifyToken, group.getGroup);
+app.post('/addMember', sessionManagement.verifyToken, group.addMember);
+app.post('/deleteMember', sessionManagement.verifyToken, group.deleteMember);
+app.post('/deleteFileFromGroup', sessionManagement.verifyToken, group.deleteFileFromGroup);
+
+app.post('/filesGroup',sessionManagement.verifyToken, files.saveFileGroup);
+app.post('/uploadFileInGroup',sessionManagement.verifyToken, files.uploadFileInGroup);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

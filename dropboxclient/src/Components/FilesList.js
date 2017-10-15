@@ -79,6 +79,7 @@ class FilesList extends Component{
                     this.setState({
                         messageForShareFile: res.data.message
                     });
+                    this.closeModalDir();
                 } else if(res.data.statusCode === 300) {
                     this.setState({
                         messageForShareFile: res.data.message,
@@ -116,6 +117,7 @@ class FilesList extends Component{
                     this.setState({
                         messageForShareFile: res.data.message
                     });
+                    this.closeModalFile();
                 } else if(res.data.statusCode === 300) {
                     this.setState({
                         messageForShareFile: res.data.message,

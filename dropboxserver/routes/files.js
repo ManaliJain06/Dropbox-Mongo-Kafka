@@ -148,3 +148,103 @@ exports.uploadFileInDir = function(req,res) {
     });
 }
 
+const storageGroup = multer.diskStorage({
+        destination: function (req, file, callback) {
+            console.log(file);
+            // http://localhost:3003/1507751921274Resume_Manali_Jain.pdf
+            callback(null, path.join(__dirname, "/../public/"))
+        },
+        filename: function (req, file, callback) {
+
+            console.log("filename", file.originalname);
+            let uuidv4 = uuid();
+            console.log(uuidv4);
+            let filename = Date.now() + file.originalname;
+            let filePath = "http://localhost:3003/" + filename;
+            insertFileGroup(file, filePath,sessionMgmt.user_uuid, uuidv4);
+            req.file_uuid = uuidv4;
+            callback(null, filename);
+        }
+    }
+);
+
+const uploadGroup = multer({ storage: storageGroup }).single('file');
+
+exports.saveFileGroup = function (req,res) {
+    uploadGroup(req, res, function (err) {
+        console.log("file_uuid is jhjkgjkhjkhjhk", req.file_uuid);
+        if(err){
+            console.log(err);
+            let msg = "Error occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "error",
+                "message": msg
+            };
+            res.status(500).json({jsonResponse});
+        }else{
+            console.log("From save file: ")
+            // let msg = "saved successfully";
+            // let jsonResponse = {
+            //     "statusCode": 201,
+            //     "result": "Success",
+            //     "message": msg
+            // };
+            // res.send(jsonResponse);
+            res.status(201).json({file_uuid : req.file_uuid});
+        }
+    })
+};
+
+insertFileGroup = function (file, filePath, user_uuid, uuidv4) {
+
+    var file_creation_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+
+    let insertFileGroupQuery = "insert into file_in_group(file_uuid,file_created,file_name,file_path,file_owner)" +
+        " values ('" + uuidv4 + "','" + file_creation_timestamp + "','" + file.originalname + "','"
+        + filePath + "','" +  user_uuid + "');";
+    console.log("query:", insertFileGroupQuery);
+
+    mysqlConnection.userSignup(insertFileGroupQuery, function (err, result) {
+        console.log('RESULT Is', result);
+        if (err) {
+            throw err;
+        }
+    });
+};
+
+exports.uploadFileInGroup = function(req,res){
+    let jsonResponse = {};
+
+    let fileGroupQuery = "update file_in_group set group_name='" + req.body.group_name + "', group_uuid ='" + req.body.group_uuid + "'"+
+    "where  file_uuid = '"+req.body.file_uuid+"' AND file_owner ='"+req.body.user_uuid+"';";
+
+    console.log(fileGroupQuery);
+
+    mysqlConnection.userSignup(fileGroupQuery, function (err, result) {
+        if (err) {
+            var msg = "Error Occured. upload once again";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else if (result.affectedRows > 0) {
+            jsonResponse = {
+                "statusCode": 201,
+                "result": "Success",
+                "msg": ''
+            };
+            res.send(jsonResponse);
+        } else {
+            var msg = "Error Occured";
+            jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        }
+    });
+}

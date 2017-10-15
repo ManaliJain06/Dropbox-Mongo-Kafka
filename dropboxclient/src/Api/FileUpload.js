@@ -34,6 +34,22 @@ export const uploadFile = (payload) => {
         }))
 }
 
+export const uploadFileGroup = (payload) => {
+    const token = sessionStorage.jwtToken;
+    return fetch(`http://localhost:3003/filesGroup`, {
+        method: 'POST',
+        headers: { 'authorization': token },
+        body: payload
+    }).then(response =>
+        response.json().then(data => ({
+                data: data,
+                status: response.status
+            })
+        ).then(res => {
+            console.log("hjhjhjhjhjkkjhjhkj",res);
+            return res;
+        }))
+}
 // fetch(url).then(response =>
 //     response.json().then(data => ({
 //             data: data,
@@ -51,6 +67,23 @@ export const uploadInDir = (payload) => {
     const token = sessionStorage.jwtToken;
     console.log("token",token);
     return axios.post('http://localhost:3003/uploadFileInDir', payload, {
+            headers: { 'authorization': token }
+        }
+    )
+        .then(function (response) {
+            console.log(response);
+            return response
+        })
+        .catch(function (error) {
+            console.log(error);
+            return error
+        });
+};
+
+export const uploadInGroup = (payload) => {
+    const token = sessionStorage.jwtToken;
+    console.log("token",token);
+    return axios.post('http://localhost:3003/uploadFileInGroup', payload, {
             headers: { 'authorization': token }
         }
     )
