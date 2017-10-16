@@ -57,6 +57,9 @@ class UserHome extends Component {
         if(this.props.userMenuSelection.menuSelection === 'groups'){
             switchDecision = <Groups/>;
         }
+        if(this.props.userMenuSelection.menuSelection === 'folder'){
+            switchDecision = <Folder/>;
+        }
         if(this.props.userMenuSelection.menuSelection === 'link'){
             switchDecision = <Link/>;
         }

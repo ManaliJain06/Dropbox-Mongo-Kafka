@@ -70,7 +70,7 @@ class Signup extends Component{
         let messagediv =null;
         if(this.state.message !== ''){
            messagediv = <div className="clearfix">
-                            <div class="alert alert-danger text-center" role="alert">{this.state.message}</div>
+                            <div className="alert alert-danger text-center" role="alert">{this.state.message}</div>
                         </div>;
         } else{
             messagediv = <div></div>;
