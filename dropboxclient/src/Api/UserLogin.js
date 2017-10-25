@@ -7,8 +7,7 @@ const axios = require("axios")
 
 export const signup = (payload) => {
     console.log("payload", payload)
-    return axios.post('http://localhost:3003/signup', {data: payload, credentials:'include'}
-    )
+    return axios.post('http://localhost:3003/signup', payload)
         .then(function (response) {
             console.log(response);
             return response
@@ -21,8 +20,7 @@ export const signup = (payload) => {
 
 export const login = (payload) => {
     console.log("payload", payload)
-    return axios.post('http://localhost:3003/login', {data: payload,  credentials:'include' }
-    )
+    return axios.post('http://localhost:3003/loginData', payload)
         .then(function (response) {
             console.log(response);
             return response

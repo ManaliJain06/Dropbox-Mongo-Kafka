@@ -13,6 +13,10 @@ var sessionManagement = require('./routes/sessionManagement');
 var session = require('client-sessions');
 var jwt = require('jsonwebtoken');
 
+var mongoSessionURL = "mongodb://localhost:27017/sessions";
+var expressSessions = require("express-session");
+var mongoStore = require("connect-mongo/es5")(expressSessions);
+
 var app = express();
 
 
@@ -38,7 +42,7 @@ var group = require('./routes/group');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -49,11 +53,10 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use('/', index);
-// // app.use('/users', users);
+app.use('/', index);
+app.use('/users', users);
 app.post("/signup", dropboxUser.userSignupData);
-app.post("/login", dropboxUser.userLoginData);
-// app.post("/postUserInterest", dropboxUser.postUserInterest);
+app.post("/loginData", dropboxUser.userLoginData);
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);
@@ -102,22 +105,6 @@ app.use(function (err, req, res, next) {
 app.listen(3003, function () {
     console.log("Server started on port: " + 3003);
 });
-
-//JWT session
-// exports.generateToken = function(user) {
-//     //1. Dont use password and other sensitive fields
-//     //2. Use fields that are useful in other parts of the
-//     //app/collections/models
-//     var u = {
-//         name: user.name,
-//         username: user.username,
-//         admin: user.admin,
-//         _id: user._id.toString(),
-//     };
-//     return token = jwt.sign(u, process.env.JWT_SECRET, {
-//         expiresIn: 60 * 60 * 24 // expires in 24 hours
-//     });
-// }
 
 module.exports = app;
 

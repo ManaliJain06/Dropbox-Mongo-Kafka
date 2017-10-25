@@ -10,7 +10,7 @@ export default function(state=loginDataState,action){
     switch (action.type) {
         case "LOGIN_DATA":
             // const newState = loginStatusState;
-            const newState  = Object.assign({}, state,action.payload[0])
+            const newState  = Object.assign({}, state,action.payload)
             return newState;
 
         case "LOGIN_DATA_INTEREST_UPDATE":

@@ -28,6 +28,7 @@ class FilesList extends Component{
         let loginData = this.props.loginDataProp;
         this.state = {
             "user_uuid" : loginData.user_uuid,
+            "_id": loginData._id,
             "modalIsOpenFile": false,
             'modalIsOpenDir' : false,
             "modalShareLink" : false,
@@ -148,7 +149,8 @@ class FilesList extends Component{
         var shareFileData = {
             "shareToEmail" : this.state.email,
             "file": file,
-            "user_uuid": this.state.user_uuid
+            "user_uuid": this.state.user_uuid,
+            "_id": file._id
         }
         console.log("shared file data", shareFileData);
         this.callAPIForShareFile(shareFileData);
@@ -186,10 +188,16 @@ class FilesList extends Component{
     }
 
     uploadFileInFolder = (event) => {
+        const file = this.props.file;
         const payload = new FormData();
         payload.append('file', event.target.files[0]);
-        payload.append('user_uuid', loginData.user_uuid);
-
+        payload.append('user_uuid', this.state.user_uuid);
+        payload.append('dir_name', file.dir_name);
+        payload.append('dir_uuid', file.dir_uuid);
+        payload.append('_id', file._id);
+        payload.forEach(function(d){
+            console.log(d)
+        })
         api.uploadFile(payload)
             .then((res) => {
                 if (res.status === 201) {
@@ -227,7 +235,7 @@ class FilesList extends Component{
     handleDeleteFile = () => {
         const file = this.props.file;
         var payload = {
-            "file_uuid": file.filesArray[0].file_uuid,
+            "_id": file._id,
             "user_uuid": this.state.user_uuid
         }
         this.callDeleteFileAPI(payload);
@@ -292,19 +300,26 @@ class FilesList extends Component{
     }
     handleStarItem = () => {
         const file = this.props.file;
-        let file_uuid ='';
-        if(file.filesArray.length>0){
-            file_uuid=file.filesArray[0].file_uuid;
+        //MYSQL code
+        // let file_uuid ='';
+        // if(file.filesArray.length>0){
+        //     file_uuid=file.filesArray[0].file_uuid;
+        // }
+        // this.setState({
+        //     ...this.state,
+        //     "file_uuid": file_uuid,
+        //     "dir_name": file.dir_name,
+        //     "dir_uuid": file.dir_uuid,
+        // }, this.callStarAPI);
+
+        //for MONGO code
+        let payload = {
+            "_id": file._id,
         }
-        this.setState({
-            ...this.state,
-            "file_uuid": file_uuid,
-            "dir_name": file.dir_name,
-            "dir_uuid": file.dir_uuid,
-        }, this.callStarAPI);
+        this.callStarAPI(payload);
     }
-    callStarAPI = ()=>{
-        API.starItem(this.state)
+    callStarAPI = (payload)=>{
+        API.starItem(payload)
             .then((res) => {
                 if (res.data.statusCode === 201) {
                     this.props.callHome('home');
@@ -371,90 +386,136 @@ class FilesList extends Component{
         console.log("dsjkdsjd",file);
 
         if(file !== ''){
-            // to decide whether user can star a file or directory and also to set the starred/unstarred value
-            let isStar = file.star_id;
-            let starred ='';
-            if(isStar === '1'){
-                starred = <div className="star-files">Starred</div>;
-            } else if(isStar === ''){
-               starred = <div></div>
-            } else if(isStar === '0'){
-                starred = <div className="starred-item__content col-sm-1">
-                    {/*<button type="button" className="btn btn-btn-primary"*/}
-                            {/*onClick={this.handleStarItem}>Star</button>*/}
-                    <div className="star" onClick={this.handleStarItem}> <u>Star</u></div>
-                </div>
-            }
+            // // to decide whether user can star a file or directory and also to set the starred/unstarred value
+            // let isStar = file.star_id;
+            // let starred ='';
+            // if(isStar === '1'){
+            //     starred = <div className="star-files">Starred</div>;
+            // } else if(isStar === ''){
+            //    starred = <div></div>
+            // } else if(isStar === '0'){
+            //     starred = <div className="starred-item__content col-sm-1">
+            //         {/*<button type="button" className="btn btn-btn-primary"*/}
+            //                 {/*onClick={this.handleStarItem}>Star</button>*/}
+            //         <div className="star" onClick={this.handleStarItem}> <u>Star</u></div>
+            //     </div>
+            // }
+            //
+            // //to decide whether user can delete and share file
+            // let canDelete =null;
+            // let canShare =null;
+            // let canShareLink =null;
+            // let isOwner = file.isOwner;
+            // if(isOwner !== undefined){
+            //     if(isOwner === false){
+            //         canDelete = <div></div>;
+            //         canShare = <div></div>;
+            //     }
+            //     else{
+            //         // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
+            //         canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
+            //         // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
+            //         canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
+            //         canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
+            //     }
+            // } else{
+            //     // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
+            //     canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
+            //     // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
+            //     canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
+            //     canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
+            // }
+            //
+            // //to decide whether user can delete and share directory
+            // let canDeleteDir =null;
+            // let canShareDir =null;
+            // let uploadFileInDir =null;
+            // let isOwnerDir = file.isOwnerDir;
+            // if(isOwnerDir !== undefined){
+            //     if(isOwnerDir === false){
+            //         canDeleteDir = <div></div>;
+            //         // canShareDir = <div></div>;
+            //         uploadFileInDir =<div></div>;
+            //     }
+            //     else{
+            //         // canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+            //         canDeleteDir = <div className="star" onClick={this.handleDeleteDir}><u>Delete</u></div>
+            //         // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
+            //         uploadFileInDir = <div className="side-buttons">
+            //                              <div className="upload-button-dir">
+            //                                  <div>Upload Files in Folder</div>
+            //                                 <input className="upload" type="file" name="file"
+            //                                 onChange={this.uploadFileInFolder}/>
+            //                             </div>
+            //                         </div>
+            //     }
+            // } else{
+            //     // canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+            //     canDeleteDir = <div className="star" onClick={this.handleDeleteDir}><u>Delete</u></div>
+            //     // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
+            //     uploadFileInDir = <div className="side-buttons">
+            //                         <div className="upload-button-dir">
+            //                             <div>Upload Files in Folder</div>
+            //                             <input className="upload" type="file" name="file"
+            //                                    onChange={this.uploadFileInFolder}/>
+            //                         </div>
+            //                     </div>
+            // }
+            //
+            // if(file.filesArray.length>0 && isOwnerDir === undefined) {
+            //     // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
+            //     canShareDir = <div className="star" onClick={this.openModalDir}><u>Share</u></div>
+            // } else{
+            //     canShareDir = <div></div>;
+            // }
 
-            //to decide whether user can delete and share file
-            let canDelete =null;
-            let canShare =null;
-            let canShareLink =null;
-            let isOwner = file.isOwner;
-            if(isOwner !== undefined){
-                if(isOwner === false){
-                    canDelete = <div></div>;
-                    canShare = <div></div>;
-                }
-                else{
-                    // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
-                    canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
-                    // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
-                    canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
-                    canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
-                }
-            } else{
-                // canDelete = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteFile}>Delete </button>
-                canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
-                // canShare =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalFile}>Share</button>
-                canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
-                canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
-            }
-
-            //to decide whether user can delete and share directory
+            //Mongo code for deciding the operations in file
+            let canDelete ='';
+            let canShare ='';
+            let canShareLink ='';
+            let starred = '';
             let canDeleteDir =null;
             let canShareDir =null;
             let uploadFileInDir =null;
-            let isOwnerDir = file.isOwnerDir;
-            if(isOwnerDir !== undefined){
-                if(isOwnerDir === false){
-                    canDeleteDir = <div></div>;
-                    // canShareDir = <div></div>;
-                    uploadFileInDir =<div></div>;
-                }
-                else{
-                    // canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
-                    canDeleteDir = <div className="star" onClick={this.handleDeleteDir}><u>Delete</u></div>
-                    // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
-                    uploadFileInDir = <div className="side-buttons">
-                                         <div className="upload-button-dir">
-                                             <div>Upload Files in Folder</div>
-                                            <input className="upload" type="file" name="file"
-                                            onChange={this.uploadFileInFolder}/>
-                                        </div>
-                                    </div>
-                }
-            } else{
-                // canDeleteDir = <button type="button" className="btn btn-btn-primary" onClick={this.handleDeleteDir}>Delete </button>
+            if(file.owner_uuid !== this.state.user_uuid) {
+                canDelete = <div></div>
+                canShare = <div></div>
+                canShareLink = <div></div>
+                starred = <div></div>
+                canDeleteDir = <div></div>
+                canShareDir = <div></div>
+                uploadFileInDir = <div></div>
+            } else {
+                canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
+                canShare = <div className="star" onClick={this.openModalFile}><u>Share</u></div>
+                canShareLink = <div className="star" onClick={this.openModalShareLink}><u>Share Link</u></div>
                 canDeleteDir = <div className="star" onClick={this.handleDeleteDir}><u>Delete</u></div>
-                // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
                 uploadFileInDir = <div className="side-buttons">
-                                    <div className="upload-button-dir">
-                                        <div>Upload Files in Folder</div>
-                                        <input className="upload" type="file" name="file"
-                                               onChange={this.uploadFileInFolder}/>
-                                    </div>
-                                </div>
-            }
+                    <div className="upload-button-dir">
+                        <div>Upload Files in Folder</div>
+                        <input className="upload" type="file" name="file"
+                               onChange={this.uploadFileInFolder}/>
+                    </div>
+                </div>
 
-            if(file.filesArray.length>0 && isOwnerDir === undefined) {
-                // canShareDir =   <button type="button" className="btn btn-btn-primary" onClick={this.openModalDir}>Share</button>
-                canShareDir = <div className="star" onClick={this.openModalDir}><u>Share</u></div>
-            } else{
-                canShareDir = <div></div>;
-            }
+                let isStar = file.star_id;
+                if(isStar === '1'){
+                    starred = <div className="star-files">Starred</div>;
+                } else if(isStar === '0'){
+                    starred = <div className="starred-item__content col-sm-1">
+                        <div className="star" onClick={this.handleStarItem}> <u>Star</u></div>
+                    </div>
+                }
 
-                if(file.dir_name !== ''){
+                if(file.filesArray.length>0) {
+                    canShareDir = <div className="star" onClick={this.openModalDir}><u>Share</u></div>
+                } else{
+                    canShareDir = <div></div>;
+                }
+            }
+            //MONGO code ends
+
+            if(file.dir_name !== ''){
                 var fileInDirList ='';
                 if(file.filesArray.length>0){
                     fileInDirList =  file.filesArray.map((item, index) => {

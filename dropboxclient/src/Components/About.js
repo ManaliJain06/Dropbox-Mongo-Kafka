@@ -33,6 +33,7 @@ class About extends Component{
             this.setState({
                 ...this.state,
                 "id": loginData.id,
+                "id": loginData.id,
                 "uuid": loginData.uuid
             }, this.callAPI);
         } else {

@@ -30,6 +30,7 @@ class Interest extends Component{
             var loginData = this.props.loginDataProp;
             this.setState({
                 ...this.state,
+                "_id": loginData._id,
                 "id": loginData.id,
                 "user_uuid": loginData.user_uuid
             }, this.callAPI);

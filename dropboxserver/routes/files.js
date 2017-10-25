@@ -10,7 +10,8 @@ var moment = require('moment');
 var sessionMgmt = require('./sessionManagement');
 var mysqlConnection = require('./mysqlConnector');
 
-
+var mongo = require("./mongoConnector");
+var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
 
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
@@ -60,30 +61,30 @@ exports.saveFile = function (req,res) {
     })
 };
 
-insertFile = function (file, filePath, user_uuid, uuidv4) {
-
-    var file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-
-    let insertFileQuery = "insert into file(file_uuid,file_created,file_name,file_type,user_uuid,isInDirectory," +
-        "star_id,file_path) values ('" + uuidv4 + "','" + file_created_timestamp + "','" + file.originalname + "','"
-        + file.mimetype + "','" +  user_uuid + "', '0', '0', '" + filePath + "');";
-    console.log("query:", insertFileQuery);
-
-    // let mappingFile_User = "insert into file_dir_user(file_uuid,user_uuid) values ('"
-    //     + uuidv4 + "','" + user_uuid +"');";
-    //
-    // console.log("query:", mappingFile_User);
-    // let mapping_star = "update directory set star_id='yes' where  dir_uuid = '"+req.body.dir_uuid+"' " +
-    //     "AND dir_name = '"+req.body.dir_name+"' AND user_uuid = '"+req.body.user_uuid+"';";
-    // console.log(mapping_star);
-
-    mysqlConnection.userSignup(insertFileQuery, function (err, result) {
-        console.log('RESULT Is', result);
-        if (err) {
-            throw err;
-        }
-    });
-};
+// insertFile = function (file, filePath, user_uuid, uuidv4) {
+//
+//     var file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+//
+//     let insertFileQuery = "insert into file(file_uuid,file_created,file_name,file_type,user_uuid,isInDirectory," +
+//         "star_id,file_path) values ('" + uuidv4 + "','" + file_created_timestamp + "','" + file.originalname + "','"
+//         + file.mimetype + "','" +  user_uuid + "', '0', '0', '" + filePath + "');";
+//     console.log("query:", insertFileQuery);
+//
+//     // let mappingFile_User = "insert into file_dir_user(file_uuid,user_uuid) values ('"
+//     //     + uuidv4 + "','" + user_uuid +"');";
+//     //
+//     // console.log("query:", mappingFile_User);
+//     // let mapping_star = "update directory set star_id='yes' where  dir_uuid = '"+req.body.dir_uuid+"' " +
+//     //     "AND dir_name = '"+req.body.dir_name+"' AND user_uuid = '"+req.body.user_uuid+"';";
+//     // console.log(mapping_star);
+//
+//     mysqlConnection.userSignup(insertFileQuery, function (err, result) {
+//         console.log('RESULT Is', result);
+//         if (err) {
+//             throw err;
+//         }
+//     });
+// };
 
 exports.uploadFileInDir = function(req,res) {
     let jsonResponse = {};
@@ -248,3 +249,37 @@ exports.uploadFileInGroup = function(req,res){
         }
     });
 }
+
+//MONGO code
+
+insertFile = function (file, filePath, user_uuid, uuidv4) {
+
+    let file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+
+    mongo.connect(mongoLogin, function (mongoConn) {
+        console.log('Connected to mongo at: ' + mongoLogin);
+
+        let collection = mongoConn.collection('files');
+        let payload = {
+            "user_uuid" : [sessionMgmt.user_uuid],
+            "dir_name" : '',
+            "dir_uuid" : '',
+            "dir_created": '',
+            "star_id" : '0',
+            "owner_uuid" : sessionMgmt.user_uuid,
+            "filesArray" : [{
+                "file_uuid": uuidv4,
+                "file_created" : file_created_timestamp,
+                "file_name": file.originalname,
+                "file_type": file.mimetype,
+                "file_path" : filePath
+            }]
+        }
+        collection.insert(payload, function (err, result) {
+            // console.log("file result is", result);
+            if (err) {
+                throw err;
+            }
+        });
+    });
+};

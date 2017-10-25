@@ -13,27 +13,27 @@ export const signup = (data) => {
             msg = "All fields are mandatory. Please fill all details";
             return msg;
         }
-        if (!(namePattern.test(data.firstName))) {
-            msg = "Enter correct First Name";
-            return msg;
-        }
-
-        if(!(namePattern.test(data.lastName))){
-            msg = "Enter correct Last Name";
-            return msg;
-        }
-        if (!(emailPattern.test(data.email))) {
-            msg = "Enter correct email address";
-            return msg;
-        }
-        if (data.password.length<8 || data.password.length>14) {
-            msg = "Password must be 8 to 15 character long";
-            return msg;
-        }
-        if (!(passwordPattern.test(data.password))) {
-                msg = "Password should contain one small letter, \n one capital letter, one digit \nand one special character ";
-                return msg;
-        }
+        // if (!(namePattern.test(data.firstName))) {
+        //     msg = "Enter correct First Name";
+        //     return msg;
+        // }
+        //
+        // if(!(namePattern.test(data.lastName))){
+        //     msg = "Enter correct Last Name";
+        //     return msg;
+        // }
+        // if (!(emailPattern.test(data.email))) {
+        //     msg = "Enter correct email address";
+        //     return msg;
+        // }
+        // if (data.password.length<8 || data.password.length>14) {
+        //     msg = "Password must be 8 to 15 character long";
+        //     return msg;
+        // }
+        // if (!(passwordPattern.test(data.password))) {
+        //         msg = "Password should contain one small letter, \n one capital letter, one digit \nand one special character ";
+        //         return msg;
+        // }
         if(!check){
                 msg="please select terms and condition";
                 return msg;
@@ -51,10 +51,10 @@ export const login = (data) => {
                 msg = "All fields are mandatory. Please fill all details";
                 return msg;
             }
-            if (!(emailPattern.test(data.email))) {
-                msg = "Enter correct email";
-                return msg;
-            }
+            // if (!(emailPattern.test(data.email))) {
+            //     msg = "Enter correct email";
+            //     return msg;
+            // }
             return msg;
 };
 
