@@ -27,7 +27,8 @@ class FilesInDir extends Component{
             "dir_uuid": file.dir_uuid,
             "user_uuid": this.state.user_uuid,
             "file_uuid": fileListInDir.file_uuid,
-            "file_name": fileListInDir.file_name
+            "file_name": fileListInDir.file_name,
+            "_id": file._id,
         }
         this.callDeleteFileInDirAPI(payload);
     }
@@ -60,23 +61,27 @@ class FilesInDir extends Component{
         const fileListInDir =  this.props.fileListInDir;
         const file = this.props.file1;
         let canDelete =null;
-        let isOwner = file.isOwnerDir;
-        if(isOwner !== undefined){
-            if(isOwner === false){
-                canDelete = <div></div>;
-            }
-            else{
-                canDelete = <div className="options star" onClick={this.deleteFiles}><u>Delete</u></div>
-            }
-        } else{
-            canDelete = <div className="options star" onClick={this.deleteFiles}><u>Delete</u></div>
+        // let isOwner = file.isOwnerDir;
+        // if(isOwner !== undefined){
+        //     if(isOwner === false){
+        //         canDelete = <div></div>;
+        //     }
+        //     else{
+        //         canDelete = <div className="options star" onClick={this.deleteFiles}><u>Delete</u></div>
+        //     }
+        // } else{
+        //     canDelete = <div className="options star" onClick={this.deleteFiles}><u>Delete</u></div>
+        // }
+        if(file.owner_uuid !== this.state.user_uuid) {
+            canDelete = <div></div>
+        } else {
+            canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
         }
-        // const dirName = this.props.dirName;
         return(
                     <div className ="row">
                         <li className="starred-item">
                             <div className="starred-item__content col-sm-1">
-                                <div className="image-wrapper-fileInDir"></div>
+                                <div className="image-wrapper-fileInDir"> </div>
                             </div>
                             <div className="starred-item__content col-sm-9">
                                 <a href={fileListInDir.file_path} className="starred-item__title"
@@ -99,7 +104,6 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-    // return bindActionCreators({loginState:loginState},dispatch)
     return {
         loginState: (data) => dispatch(loginState(data))
     };

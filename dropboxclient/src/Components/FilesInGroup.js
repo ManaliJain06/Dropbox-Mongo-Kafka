@@ -24,7 +24,8 @@ class FilesInGroup extends Component{
         let deleteFile = {
             "file_uuid" : fileListInGrp.file_uuid,
             "group_name": group.group_name,
-            "group_uuid": group.group_uuid
+            "group_uuid": group.group_uuid,
+            "_id": group._id
         }
         this.callDeleteFileInGroupAPI(deleteFile);
     }

@@ -15,6 +15,8 @@ var mongo = require("./mongoConnector");
 var mongodb = require('mongodb');
 var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
 
+//MYSQL code
+
 // exports.createDirectory = function(req, res) {
 //     //assigning unique id to  directory
 //     let uuidv4 = uuid();
@@ -68,91 +70,91 @@ var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
 //         });
 // }
 
-exports.deleteDirectory = function(req, res) {
-    let jsonResponse = {};
-
-    let deleteDir = "delete from directory where dir_name = '" + req.body.dir_name + "' AND " +
-        "user_uuid = '" + req.body.user_uuid + "' AND dir_uuid = '" + req.body.dir_uuid + "';";
-
-    console.log(deleteDir);
-    let mapping_deleteDir = "delete from file_dir_user where user_uuid = '" + req.body.user_uuid + "' AND " +
-        "dir_uuid = '" + req.body.dir_uuid + "';";
-    console.log(mapping_deleteDir);
-
-         mysqlConnection.userSignup(deleteDir, function (err, result) {
-            if (err) {
-                var msg = "Error Occured. delete once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                if (result.affectedRows > 0) {
-
-                    if(req.body.file.length >0){
-                        mysqlConnection.userSignup(mapping_deleteDir, function (err, result1) {
-                            if (result1.affectedRows > 0) {
-
-                                for(let i =0;i< req.body.file.length ; i++){
-                                    let file_uuid = req.body.file[i].file_uuid;
-                                    let deleteFile = "delete from file where file_uuid = '" + file_uuid + "' AND " +
-                                        "user_uuid = '" + req.body.user_uuid + "';";
-                                    mysqlConnection.userSignup(deleteFile, function (err, result) {
-                                        if (err) {
-                                            let msg = "Error Occured. delete once again";
-                                            jsonResponse = {
-                                                "statusCode": 500,
-                                                "result": "Error",
-                                                "message": msg
-                                            };
-                                            res.send(jsonResponse);
-                                        }
-                                    });
-                                }
-
-                                var msg = "Directory deleted";
-                                jsonResponse = {
-                                    "statusCode": 201,
-                                    "result": "Success",
-                                    "data" : result1[0],
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            } else {
-                                var msg = "Error Occured";
-                                jsonResponse = {
-                                    "statusCode": 400,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            }
-                        });
-                    } else {
-                        var msg = "Directory deleted";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "data" : result[0],
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-
-                } else {
-                    var msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 400,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            }
-        });
-}
+// exports.deleteDirectory = function(req, res) {
+//     let jsonResponse = {};
+//
+//     let deleteDir = "delete from directory where dir_name = '" + req.body.dir_name + "' AND " +
+//         "user_uuid = '" + req.body.user_uuid + "' AND dir_uuid = '" + req.body.dir_uuid + "';";
+//
+//     console.log(deleteDir);
+//     let mapping_deleteDir = "delete from file_dir_user where user_uuid = '" + req.body.user_uuid + "' AND " +
+//         "dir_uuid = '" + req.body.dir_uuid + "';";
+//     console.log(mapping_deleteDir);
+//
+//          mysqlConnection.userSignup(deleteDir, function (err, result) {
+//             if (err) {
+//                 var msg = "Error Occured. delete once again";
+//                 jsonResponse = {
+//                     "statusCode": 500,
+//                     "result": "Error",
+//                     "message": msg
+//                 };
+//                 res.send(jsonResponse);
+//             } else {
+//                 if (result.affectedRows > 0) {
+//
+//                     if(req.body.file.length >0){
+//                         mysqlConnection.userSignup(mapping_deleteDir, function (err, result1) {
+//                             if (result1.affectedRows > 0) {
+//
+//                                 for(let i =0;i< req.body.file.length ; i++){
+//                                     let file_uuid = req.body.file[i].file_uuid;
+//                                     let deleteFile = "delete from file where file_uuid = '" + file_uuid + "' AND " +
+//                                         "user_uuid = '" + req.body.user_uuid + "';";
+//                                     mysqlConnection.userSignup(deleteFile, function (err, result) {
+//                                         if (err) {
+//                                             let msg = "Error Occured. delete once again";
+//                                             jsonResponse = {
+//                                                 "statusCode": 500,
+//                                                 "result": "Error",
+//                                                 "message": msg
+//                                             };
+//                                             res.send(jsonResponse);
+//                                         }
+//                                     });
+//                                 }
+//
+//                                 var msg = "Directory deleted";
+//                                 jsonResponse = {
+//                                     "statusCode": 201,
+//                                     "result": "Success",
+//                                     "data" : result1[0],
+//                                     "message": msg
+//                                 };
+//                                 res.send(jsonResponse);
+//                             } else {
+//                                 var msg = "Error Occured";
+//                                 jsonResponse = {
+//                                     "statusCode": 400,
+//                                     "result": "Error",
+//                                     "message": msg
+//                                 };
+//                                 res.send(jsonResponse);
+//                             }
+//                         });
+//                     } else {
+//                         var msg = "Directory deleted";
+//                         jsonResponse = {
+//                             "statusCode": 201,
+//                             "result": "Success",
+//                             "data" : result[0],
+//                             "message": msg
+//                         };
+//                         res.send(jsonResponse);
+//                     }
+//
+//                 } else {
+//                     var msg = "Error Occured";
+//                     jsonResponse = {
+//                         "statusCode": 400,
+//                         "result": "Error",
+//                         "message": msg
+//                     };
+//                     res.send(jsonResponse);
+//                 }
+//             }
+//         });
+// }
 
 // exports.deleteFile = function(req,res) {
 //
@@ -382,271 +384,271 @@ exports.deleteDirectory = function(req, res) {
 //     });
 // }
 
-getAllFiles = function(result) {
+// getAllFiles = function(result) {
+//
+//         let json = {};
+//         let files = [];
+//
+//         for (let i = 0; i < result.length; i++) {
+//             let filesArray = [];
+//             if (result[i].file_name !== null) {
+//                 let filejson = {
+//                     "file_name": result[i].file_name,
+//                     "file_created": result[i].file_created,
+//                     "file_path": result[i].file_path,
+//                     "file_uuid": result[i].file_uuid
+//                 };
+//                 filesArray.push(filejson);
+//             } else {
+//                 filesArray = [];
+//             }
+//             json = {
+//                 "dir_name": '',
+//                 "dir_uuid": '',
+//                 "dir_created": '',
+//                 "star_id": result[i].star_id,
+//                 "filesArray": filesArray
+//             };
+//             files.push(json);
+//         }
+//         console.log("file json", files);
+//     return files;
+// }
+//
+// getAllShareFiles = function(result, current_user){
+//     let json = {};
+//     let files = [];
+//
+//     for (let i = 0; i < result.length; i++) {
+//         let filesArray = [];
+//         let canDelete = false;
+//         if(current_user === result[i].shareByUserId){
+//             canDelete = true;
+//         }
+//
+//         if (result[i].file_name !== null) {
+//             let filejson = {
+//                 "file_name": result[i].file_name,
+//                 "file_created": result[i].file_created,
+//                 "file_path": result[i].file_path,
+//                 "file_uuid": result[i].file_uuid
+//             };
+//             filesArray.push(filejson);
+//         } else {
+//             filesArray = [];
+//         }
+//         json = {
+//             "dir_name": '',
+//             "dir_uuid": '',
+//             "dir_created": '',
+//             "star_id": '',
+//             "isOwner": canDelete,
+//             "filesArray": filesArray
+//         };
+//         files.push(json);
+//     }
+//     console.log(" share file json", files);
+//     return files;
+// }
+//
+// getAllDirectory = function(result){
+//     let dir = [];
+//     let filesArray = [];
+//     for(let i=0; i < result.length; i++){
+//         let json = {
+//             "dir_name":result[i].dir_name,
+//             "dir_uuid":result[i].dir_uuid,
+//             "dir_created": result[i].dir_created,
+//             "star_id": result[i].star_id,
+//             "filesArray": filesArray
+//         };
+//         dir.push(json);
+//     }
+//     console.log("dir json",dir);
+//     return dir;
+// }
+//
+// getFilesAndDirectory = function(result) {
+//     console.log(result);
+//     let filesDir = [];
+//     let flag = true;
+//     for (let i = 0; i < result.length; i++) {
+//
+//         for (let j = 0; j < filesDir.length; j++) {
+//             if (result[i].dir_name !== null && (result[i].dir_name === filesDir[j].dir_name)) {
+//                 flag = false;
+//                 let filejson1 = {
+//                     "file_name": result[i].file_name,
+//                     "file_created": result[i].file_created,
+//                     "file_path": result[i].file_path,
+//                     "file_uuid": result[i].file_uuid
+//                 };
+//                 // filesArray.push();
+//                 var array = [];
+//                 array = filesDir[j].filesArray;
+//                 array.push(filejson1);
+//
+//                 filesDir[j].filesArray = array;
+//                 break;
+//                 // result.splice(i,1);
+//                 // i = i-1;
+//             }
+//             flag = true;
+//         }
+//
+//         if (flag) {
+//             let filesArray = [];
+//             let filejson = {
+//                 "file_name": result[i].file_name,
+//                 "file_created": result[i].file_created,
+//                 "file_path": result[i].file_path,
+//                 "file_uuid": result[i].file_uuid
+//             };
+//             filesArray.push(filejson);
+//
+//             let json = {
+//                 "dir_name": result[i].dir_name,
+//                 "dir_uuid": result[i].dir_uuid,
+//                 "star_id": result[i].star_id,
+//                 "filesArray": filesArray
+//             };
+//             filesDir.push(json);
+//         }
+//         console.log("fir & dir json",filesDir);
+//     }
+//     return filesDir;
+// }
+//
+// getAllShareDir = function(result,current_user) {
+//     console.log(result);
+//     let filesDir = [];
+//     let flag = true;
+//     for (let i = 0; i < result.length; i++) {
+//         let canDelete = false;
+//         if(current_user === result[i].shareByUserId){
+//             canDelete = true;
+//         }
+//         for (let j = 0; j < filesDir.length; j++) {
+//             if (result[i].dir_name !== null && (result[i].dir_name === filesDir[j].dir_name)) {
+//                 flag = false;
+//                 let filejson1 = {
+//                     "file_name": result[i].file_name,
+//                     "file_created": result[i].file_created,
+//                     "file_path": result[i].file_path,
+//                     "file_uuid": result[i].file_uuid
+//                 };
+//                 // filesArray.push();
+//                 var array = [];
+//                 array = filesDir[j].filesArray;
+//                 array.push(filejson1);
+//
+//                 filesDir[j].filesArray = array;
+//                 break;
+//                 // result.splice(i,1);
+//                 // i = i-1;
+//             }
+//             flag = true;
+//         }
+//
+//         if (flag) {
+//             let filesArray = [];
+//             let filejson = {
+//                 "file_name": result[i].file_name,
+//                 "file_created": result[i].file_created,
+//                 "file_path": result[i].file_path,
+//                 "file_uuid": result[i].file_uuid
+//             };
+//             filesArray.push(filejson);
+//
+//             let json = {
+//                 "dir_name": result[i].dir_name,
+//                 "dir_uuid": result[i].dir_uuid,
+//                 "star_id": '',
+//                 "isOwnerDir": canDelete,
+//                 "filesArray": filesArray
+//             };
+//             filesDir.push(json);
+//         }
+//         console.log("fir & dir shared json",filesDir);
+//     }
+//     return filesDir;
+// }
 
-        let json = {};
-        let files = [];
-
-        for (let i = 0; i < result.length; i++) {
-            let filesArray = [];
-            if (result[i].file_name !== null) {
-                let filejson = {
-                    "file_name": result[i].file_name,
-                    "file_created": result[i].file_created,
-                    "file_path": result[i].file_path,
-                    "file_uuid": result[i].file_uuid
-                };
-                filesArray.push(filejson);
-            } else {
-                filesArray = [];
-            }
-            json = {
-                "dir_name": '',
-                "dir_uuid": '',
-                "dir_created": '',
-                "star_id": result[i].star_id,
-                "filesArray": filesArray
-            };
-            files.push(json);
-        }
-        console.log("file json", files);
-    return files;
-}
-
-getAllShareFiles = function(result, current_user){
-    let json = {};
-    let files = [];
-
-    for (let i = 0; i < result.length; i++) {
-        let filesArray = [];
-        let canDelete = false;
-        if(current_user === result[i].shareByUserId){
-            canDelete = true;
-        }
-
-        if (result[i].file_name !== null) {
-            let filejson = {
-                "file_name": result[i].file_name,
-                "file_created": result[i].file_created,
-                "file_path": result[i].file_path,
-                "file_uuid": result[i].file_uuid
-            };
-            filesArray.push(filejson);
-        } else {
-            filesArray = [];
-        }
-        json = {
-            "dir_name": '',
-            "dir_uuid": '',
-            "dir_created": '',
-            "star_id": '',
-            "isOwner": canDelete,
-            "filesArray": filesArray
-        };
-        files.push(json);
-    }
-    console.log(" share file json", files);
-    return files;
-}
-
-getAllDirectory = function(result){
-    let dir = [];
-    let filesArray = [];
-    for(let i=0; i < result.length; i++){
-        let json = {
-            "dir_name":result[i].dir_name,
-            "dir_uuid":result[i].dir_uuid,
-            "dir_created": result[i].dir_created,
-            "star_id": result[i].star_id,
-            "filesArray": filesArray
-        };
-        dir.push(json);
-    }
-    console.log("dir json",dir);
-    return dir;
-}
-
-getFilesAndDirectory = function(result) {
-    console.log(result);
-    let filesDir = [];
-    let flag = true;
-    for (let i = 0; i < result.length; i++) {
-
-        for (let j = 0; j < filesDir.length; j++) {
-            if (result[i].dir_name !== null && (result[i].dir_name === filesDir[j].dir_name)) {
-                flag = false;
-                let filejson1 = {
-                    "file_name": result[i].file_name,
-                    "file_created": result[i].file_created,
-                    "file_path": result[i].file_path,
-                    "file_uuid": result[i].file_uuid
-                };
-                // filesArray.push();
-                var array = [];
-                array = filesDir[j].filesArray;
-                array.push(filejson1);
-
-                filesDir[j].filesArray = array;
-                break;
-                // result.splice(i,1);
-                // i = i-1;
-            }
-            flag = true;
-        }
-
-        if (flag) {
-            let filesArray = [];
-            let filejson = {
-                "file_name": result[i].file_name,
-                "file_created": result[i].file_created,
-                "file_path": result[i].file_path,
-                "file_uuid": result[i].file_uuid
-            };
-            filesArray.push(filejson);
-
-            let json = {
-                "dir_name": result[i].dir_name,
-                "dir_uuid": result[i].dir_uuid,
-                "star_id": result[i].star_id,
-                "filesArray": filesArray
-            };
-            filesDir.push(json);
-        }
-        console.log("fir & dir json",filesDir);
-    }
-    return filesDir;
-}
-
-getAllShareDir = function(result,current_user) {
-    console.log(result);
-    let filesDir = [];
-    let flag = true;
-    for (let i = 0; i < result.length; i++) {
-        let canDelete = false;
-        if(current_user === result[i].shareByUserId){
-            canDelete = true;
-        }
-        for (let j = 0; j < filesDir.length; j++) {
-            if (result[i].dir_name !== null && (result[i].dir_name === filesDir[j].dir_name)) {
-                flag = false;
-                let filejson1 = {
-                    "file_name": result[i].file_name,
-                    "file_created": result[i].file_created,
-                    "file_path": result[i].file_path,
-                    "file_uuid": result[i].file_uuid
-                };
-                // filesArray.push();
-                var array = [];
-                array = filesDir[j].filesArray;
-                array.push(filejson1);
-
-                filesDir[j].filesArray = array;
-                break;
-                // result.splice(i,1);
-                // i = i-1;
-            }
-            flag = true;
-        }
-
-        if (flag) {
-            let filesArray = [];
-            let filejson = {
-                "file_name": result[i].file_name,
-                "file_created": result[i].file_created,
-                "file_path": result[i].file_path,
-                "file_uuid": result[i].file_uuid
-            };
-            filesArray.push(filejson);
-
-            let json = {
-                "dir_name": result[i].dir_name,
-                "dir_uuid": result[i].dir_uuid,
-                "star_id": '',
-                "isOwnerDir": canDelete,
-                "filesArray": filesArray
-            };
-            filesDir.push(json);
-        }
-        console.log("fir & dir shared json",filesDir);
-    }
-    return filesDir;
-}
-
-exports.deleteFileInDir = function(req,res) {
-    let jsonResponse = {};
-
-    let deleteFileQuery = "delete from file where file_uuid = '" + req.body.file_uuid + "' AND " +
-        "user_uuid = '" + req.body.user_uuid + "';";
-    console.log("query:", deleteFileQuery);
-
-    let mapping_deleteDirQuery = "delete from file_dir_user where file_uuid = '"+ req.body.file_uuid + "' and " +
-    "user_uuid = '" + req.body.user_uuid + "' AND dir_uuid = '" + req.body.dir_uuid + "';";
-
-    console.log("query:", mapping_deleteDirQuery);
-
-    mysqlConnection.userSignup(deleteFileQuery, function (err, result) {
-        if (err) {
-            let msg = "Error Occured. delete once again";
-            jsonResponse = {
-                "statusCode": 500,
-                "result": "Error",
-                "message": msg
-            };
-            res.send(jsonResponse);
-        } else {
-            if (result.affectedRows > 0) {
-                mysqlConnection.userSignup(mapping_deleteDirQuery, function (err, result1) {
-                    if (result1.affectedRows > 0) {
-
-                        if(req.body.file.length === 1) {
-                            let updateFileQuery = "update directory set hasFiles='0' where  dir_uuid = '"+req.body.dir_uuid+"' " +
-                                "AND user_uuid = '"+req.body.user_uuid+"';";
-                            console.log("query:", updateFileQuery);
-                            mysqlConnection.userSignup(updateFileQuery, function (err, result) {
-                                if (err) {
-                                    let msg = "Error Occured. delete once again";
-                                    jsonResponse = {
-                                        "statusCode": 500,
-                                        "result": "Error",
-                                        "message": msg
-                                    };
-                                    res.send(jsonResponse);
-                                }
-                            });
-                        }
-                        var msg = "Directory deleted";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "data" : result1[0],
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    } else {
-                        var msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                });
-            } else {
-                var msg = "File deleted";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "Success",
-                    "data" : result[0],
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-
-        }
-    });
-
-}
+// exports.deleteFileInDir = function(req,res) {
+//     let jsonResponse = {};
+//
+//     let deleteFileQuery = "delete from file where file_uuid = '" + req.body.file_uuid + "' AND " +
+//         "user_uuid = '" + req.body.user_uuid + "';";
+//     console.log("query:", deleteFileQuery);
+//
+//     let mapping_deleteDirQuery = "delete from file_dir_user where file_uuid = '"+ req.body.file_uuid + "' and " +
+//     "user_uuid = '" + req.body.user_uuid + "' AND dir_uuid = '" + req.body.dir_uuid + "';";
+//
+//     console.log("query:", mapping_deleteDirQuery);
+//
+//     mysqlConnection.userSignup(deleteFileQuery, function (err, result) {
+//         if (err) {
+//             let msg = "Error Occured. delete once again";
+//             jsonResponse = {
+//                 "statusCode": 500,
+//                 "result": "Error",
+//                 "message": msg
+//             };
+//             res.send(jsonResponse);
+//         } else {
+//             if (result.affectedRows > 0) {
+//                 mysqlConnection.userSignup(mapping_deleteDirQuery, function (err, result1) {
+//                     if (result1.affectedRows > 0) {
+//
+//                         if(req.body.file.length === 1) {
+//                             let updateFileQuery = "update directory set hasFiles='0' where  dir_uuid = '"+req.body.dir_uuid+"' " +
+//                                 "AND user_uuid = '"+req.body.user_uuid+"';";
+//                             console.log("query:", updateFileQuery);
+//                             mysqlConnection.userSignup(updateFileQuery, function (err, result) {
+//                                 if (err) {
+//                                     let msg = "Error Occured. delete once again";
+//                                     jsonResponse = {
+//                                         "statusCode": 500,
+//                                         "result": "Error",
+//                                         "message": msg
+//                                     };
+//                                     res.send(jsonResponse);
+//                                 }
+//                             });
+//                         }
+//                         var msg = "Directory deleted";
+//                         jsonResponse = {
+//                             "statusCode": 201,
+//                             "result": "Success",
+//                             "data" : result1[0],
+//                             "message": msg
+//                         };
+//                         res.send(jsonResponse);
+//                     } else {
+//                         var msg = "Error Occured";
+//                         jsonResponse = {
+//                             "statusCode": 400,
+//                             "result": "Error",
+//                             "message": msg
+//                         };
+//                         res.send(jsonResponse);
+//                     }
+//                 });
+//             } else {
+//                 var msg = "File deleted";
+//                 jsonResponse = {
+//                     "statusCode": 201,
+//                     "result": "Success",
+//                     "data" : result[0],
+//                     "message": msg
+//                 };
+//                 res.send(jsonResponse);
+//             }
+//
+//         }
+//     });
+//
+// }
 
 // exports.shareFile = function(req,res) {
 //     let jsonResponse = {};
@@ -696,75 +698,75 @@ exports.deleteFileInDir = function(req,res) {
 //     });
 // }
 
-exports.shareDir =function(req,res){
-    let jsonResponse = {};
-    let file = req.body.file;
-    // console.log("req.body",JSON.stringify(req.body));
-    let getUserIdToShare = "select user_uuid from user where email = '" + req.body.shareToEmail + "';";
-    mysqlConnection.userSignup(getUserIdToShare, function (err, result) {
-        if (err) {
-            var msg = "Error Occured";
-            jsonResponse = {
-                "statusCode": 500,
-                "result": "Error",
-                "message": msg
-            };
-            res.send(jsonResponse);
-        } else if(result.length === 0){
-            var msg = "User is not available in dropbox";
-            jsonResponse = {
-                "statusCode": 300,
-                "result": "Error",
-                "message": msg
-            };
-            res.send(jsonResponse);
-        }else if(result.length >0){
-            console.log(result);
-            if(file.filesArray.length > 0 ){
-                let x = false;
-                for(let i = 0; i<file.filesArray.length ;i++){
-                    let insertShareDir = "insert into share_dir(dir_uuid,file_uuid,shareToUserId,shareByUserId) " +
-                        "values ('" + file.dir_uuid + "','" + file.filesArray[i].file_uuid+ "','" + result[0].user_uuid +
-                        "','" + req.body.user_uuid + "');";
-                    console.log("insertShareDir is:", insertShareDir);
-                    mysqlConnection.userSignup(insertShareDir, function (err, result1) {
-                        if (err) {
-                            var msg = "Share Folder failed";
-                            jsonResponse = {
-                                "statusCode": 500,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            console.log("All Done");
-                        }
-                    });
-                    if(i === file.filesArray.length-1) {
-                        x = true;
-                    }
-                }
-                if(x){
-                    var msg = "Share Folder success";
-                    jsonResponse = {
-                        "statusCode": 201,
-                        "result": "Success",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            } else {
-                var msg = "Share Folder failed";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-        }
-    });
-}
+// exports.shareDir =function(req,res){
+//     let jsonResponse = {};
+//     let file = req.body.file;
+//     // console.log("req.body",JSON.stringify(req.body));
+//     let getUserIdToShare = "select user_uuid from user where email = '" + req.body.shareToEmail + "';";
+//     mysqlConnection.userSignup(getUserIdToShare, function (err, result) {
+//         if (err) {
+//             var msg = "Error Occured";
+//             jsonResponse = {
+//                 "statusCode": 500,
+//                 "result": "Error",
+//                 "message": msg
+//             };
+//             res.send(jsonResponse);
+//         } else if(result.length === 0){
+//             var msg = "User is not available in dropbox";
+//             jsonResponse = {
+//                 "statusCode": 300,
+//                 "result": "Error",
+//                 "message": msg
+//             };
+//             res.send(jsonResponse);
+//         }else if(result.length >0){
+//             console.log(result);
+//             if(file.filesArray.length > 0 ){
+//                 let x = false;
+//                 for(let i = 0; i<file.filesArray.length ;i++){
+//                     let insertShareDir = "insert into share_dir(dir_uuid,file_uuid,shareToUserId,shareByUserId) " +
+//                         "values ('" + file.dir_uuid + "','" + file.filesArray[i].file_uuid+ "','" + result[0].user_uuid +
+//                         "','" + req.body.user_uuid + "');";
+//                     console.log("insertShareDir is:", insertShareDir);
+//                     mysqlConnection.userSignup(insertShareDir, function (err, result1) {
+//                         if (err) {
+//                             var msg = "Share Folder failed";
+//                             jsonResponse = {
+//                                 "statusCode": 500,
+//                                 "result": "Error",
+//                                 "message": msg
+//                             };
+//                             res.send(jsonResponse);
+//                         } else {
+//                             console.log("All Done");
+//                         }
+//                     });
+//                     if(i === file.filesArray.length-1) {
+//                         x = true;
+//                     }
+//                 }
+//                 if(x){
+//                     var msg = "Share Folder success";
+//                     jsonResponse = {
+//                         "statusCode": 201,
+//                         "result": "Success",
+//                         "message": msg
+//                     };
+//                     res.send(jsonResponse);
+//                 }
+//             } else {
+//                 var msg = "Share Folder failed";
+//                 jsonResponse = {
+//                     "statusCode": 500,
+//                     "result": "Error",
+//                     "message": msg
+//                 };
+//                 res.send(jsonResponse);
+//             }
+//         }
+//     });
+// }
 
 // exports.shareLink = function(req,res){
 //     let jsonResponse = {};
@@ -915,10 +917,6 @@ exports.createDirectory = function(req, res) {
 exports.deleteFile = function(req,res) {
 
     let jsonResponse = {};
-
-    let deleteFile = "delete from file where file_uuid = '" + req.body.file_uuid + "' AND " +
-        "user_uuid = '" + req.body.user_uuid + "';";
-    console.log("query:", deleteFile);
 
     mongo.connect(mongoLogin, function (mongoConn) {
         console.log('Connected to mongo at: ' + mongoLogin);
@@ -1087,8 +1085,8 @@ exports.shareFile = function(req,res) {
                 res.send(jsonResponse);
             } else if (result) {
                 collectionFile.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-                    {$push:{"user_uuid": result.user_uuid }}, function (err, result) {
-                        console.log("result is", result);
+                    {$push:{"user_uuid": result.user_uuid }}, function (err, result1) {
+                        console.log("result is", result1);
                         if (err) {
                             var msg = "Share file failed";
                             jsonResponse = {
@@ -1098,18 +1096,18 @@ exports.shareFile = function(req,res) {
                             };
                             res.send(jsonResponse);
                         } else {
-                            if(result.result.nModified > 0){
+                            if(result1.result.nModified > 0){
                                 var msg = "Share file success";
                                 jsonResponse = {
                                     "statusCode": 201,
-                                    "result": "Error",
+                                    "result": "Success",
                                     "message": msg
                                 };
                                 res.send(jsonResponse);
                             } else {
                                 var msg = "Error Occured";
                                 jsonResponse = {
-                                    "statusCode": 400,
+                                    "statusCode": 500,
                                     "result": "Error",
                                     "message": msg
                                 };
@@ -1121,3 +1119,157 @@ exports.shareFile = function(req,res) {
         });
     });
 }
+
+exports.deleteDirectory = function(req, res) {
+    let jsonResponse = {};
+
+    mongo.connect(mongoLogin, function (mongoConn) {
+        console.log('Connected to mongo at: ' + mongoLogin);
+
+        let collection = mongoConn.collection('files');
+        let id = "ObjectId('"+req.body._id+"')";
+        console.log("id is",id);
+        collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
+            // console.log("file result is", result);
+            if (err) {
+                let msg = "Error Occured. delete once again";
+                jsonResponse = {
+                    "statusCode": 500,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            } else {
+                if (result!==null) {
+                    let msg = "directory deleted";
+                    jsonResponse = {
+                        "statusCode": 201,
+                        "result": "Success",
+                        "data" : result,
+                        "message": msg
+                    };
+                    console.log(jsonResponse)
+                    res.send(jsonResponse);
+                } else {
+                    let msg = "Error Occured";
+                    jsonResponse = {
+                        "statusCode": 400,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                }
+            }
+        });
+    });
+}
+
+exports.shareDir =function(req,res){
+    let jsonResponse = {};
+    let file = req.body.file;
+
+    mongo.connect(mongoLogin, function(){
+        console.log('Connected to mongo at: ' + mongoLogin);
+        let collection = mongo.collection('user');
+        let collectionFile = mongo.collection('files');
+
+        collection.findOne({email: req.body.shareToEmail }, function(err, result){
+            if(err){
+                var msg = "Error Occured";
+                jsonResponse = {
+                    "statusCode": 500,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            }
+            else if (result === null) {
+                var msg = "User is not available in dropbox";
+                jsonResponse = {
+                    "statusCode": 300,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            } else if (result) {
+                collectionFile.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+                    {$push:{"user_uuid": result.user_uuid }}, function (err, result1) {
+                        console.log("result is", result1);
+                        if (err) {
+                            var msg = "Share folder failed";
+                            jsonResponse = {
+                                "statusCode": 500,
+                                "result": "Error",
+                                "message": msg
+                            };
+                            res.send(jsonResponse);
+                        } else {
+                            if(result1.result.nModified > 0){
+                                var msg = "Share folder success";
+                                jsonResponse = {
+                                    "statusCode": 201,
+                                    "result": "Success",
+                                    "message": msg
+                                };
+                                res.send(jsonResponse);
+                            } else {
+                                var msg = "Error Occured";
+                                jsonResponse = {
+                                    "statusCode": 500,
+                                    "result": "Error",
+                                    "message": msg
+                                };
+                                res.send(jsonResponse);
+                            }
+                        }
+                    });
+            }
+        });
+    });
+
+}
+
+exports.deleteFileInDir = function(req,res) {
+    let jsonResponse = {};
+
+    mongo.connect(mongoLogin, function (mongoConn) {
+        console.log('Connected to mongo at: ' + mongoLogin);
+
+        let collection = mongoConn.collection('files');
+
+            collection.update({"_id" : new mongodb.ObjectID(req.body._id)},
+                { $pull: { filesArray: {file_uuid : req.body.file_uuid }}}, function (err, result) {
+            // console.log("file result is", result);
+            if (err) {
+                let msg = "Error Occured. delete once again";
+                jsonResponse = {
+                    "statusCode": 500,
+                    "result": "Error",
+                    "message": msg
+                };
+                res.send(jsonResponse);
+            } else {
+                if (result!==null) {
+                    let msg = "directory deleted";
+                    jsonResponse = {
+                        "statusCode": 201,
+                        "result": "Success",
+                        "data" : result,
+                        "message": msg
+                    };
+                    console.log(jsonResponse)
+                    res.send(jsonResponse);
+                } else {
+                    let msg = "Error Occured";
+                    jsonResponse = {
+                        "statusCode": 400,
+                        "result": "Error",
+                        "message": msg
+                    };
+                    res.send(jsonResponse);
+                }
+            }
+        });
+    });
+}
+

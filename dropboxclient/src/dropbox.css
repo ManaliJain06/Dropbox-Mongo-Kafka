@@ -554,3 +554,8 @@ a {
     margin: 0 0px 0 35px;
     padding: 0 20px 0 0;
 }
+
+.greeting {
+    text-align: right;
+    Color: #0070E0;
+}

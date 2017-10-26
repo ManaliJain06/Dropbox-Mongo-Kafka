@@ -75,7 +75,8 @@ class FilesList extends Component{
         var shareDirData = {
             "shareToEmail" : this.state.email,
             "file": file,
-            "user_uuid": this.state.user_uuid
+            "user_uuid": this.state.user_uuid,
+            "_id": file._id
         }
         console.log("shared dir data", shareDirData);
         this.callAPIForShareDir(shareDirData);
@@ -198,12 +199,13 @@ class FilesList extends Component{
         payload.forEach(function(d){
             console.log(d)
         })
-        api.uploadFile(payload)
+        api.uploadFileGroup(payload)
             .then((res) => {
                 if (res.status === 201) {
                     const file = this.props.file;
                     this.setState({
                         ...this.state,
+                        "_id": file._id,
                         "file_uuid": res.data.file_uuid,
                         "dir_name": file.dir_name,
                         "dir_uuid": file.dir_uuid,
@@ -222,7 +224,11 @@ class FilesList extends Component{
                     this.setState({
                         message: res.data.message
                     });
-                } else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
+                } else if (res.data.statusCode === 300) {
+                    this.setState({
+                        message: res.data.message
+                    });
+                }else if (res.data.statusCode === 601  || res.data.statusCode === 600) {
                     alert("Token expired or invalid. Please login again");
                     this.setState({
                         message: res.data.message
@@ -267,6 +273,7 @@ class FilesList extends Component{
     handleDeleteDir = () => {
         const file = this.props.file;
         var payload = {
+            "_id": file._id,
             "file": file.filesArray,
             "dir_name": file.dir_name,
             "dir_uuid": file.dir_uuid,
