@@ -62,7 +62,8 @@ class GroupList extends Component{
         const group =  this.props.group;
         let deleteGroup = {
             "group_name": group.group_name,
-            "group_uuid": group.group_uuid
+            "group_uuid": group.group_uuid,
+            "_id": group._id
         }
         this.callAPIForDeleteGroup(deleteGroup);
     }
@@ -103,7 +104,8 @@ class GroupList extends Component{
                         let deleteMem = {
                             "delete_uuid": group.membersArray[i].member_uuid,
                             "group_name": group.group_name,
-                            "group_uuid": group.group_uuid
+                            "group_uuid": group.group_uuid,
+                            "_id" : group._id
                         }
                         flag = false;
                         this.callAPIForDeleteMember(deleteMem);
@@ -134,7 +136,7 @@ class GroupList extends Component{
                         messageForDeleteMem: res.data.message
                     });
                     this.closeModalDir();
-                } else if(res.data.statusCode === 300) {
+                } else if(res.data.statusCode === 400) {
                     this.setState({
                         messageForDeleteMem: res.data.message,
                         email : ''
@@ -155,7 +157,8 @@ class GroupList extends Component{
         let addMem = {
             "addToEmail" : this.state.email,
             "group_name": group.group_name,
-            "group_uuid": group.group_uuid
+            "group_uuid": group.group_uuid,
+            "_id" : group._id
         }
         // console.log("shared dir data", shareDirData);
         this.callAPIForAddMember(addMem);
@@ -202,6 +205,7 @@ class GroupList extends Component{
                         "file_uuid": res.data.file_uuid,
                         "group_name": group.group_name,
                         "group_uuid": group.group_uuid,
+                        "_id": group._id
                     }, this.callUploadInGroupAPI);
                 } else {
                     alert("Error in file upload");
