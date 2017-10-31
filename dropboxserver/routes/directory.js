@@ -5,15 +5,14 @@
 
 var uuid = require('uuid/v4');
 var mysqlConnection = require('./mysqlConnector');
-var session = require('client-sessions');
-var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var sessionMgmt = require('./sessionManagement');
 
 var mongo = require("./mongoConnector");
 var mongodb = require('mongodb');
 var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
+var kafkaConnect = require('./kafkaConnect');
+
 
 //MYSQL code
 
@@ -819,44 +818,61 @@ var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
 //MONGO code
 exports.getFiles = function(req, res) {
 
-    let jsonResponse = {};
-
-    let files = [];
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('files');
-        collection.find({'user_uuid': sessionMgmt.user_uuid}).toArray(function(err, result) {
-            console.log("file result is", result);
-            if (err) {
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result !== null) {
-                var msg = "";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "success",
-                    "files": result,
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                var msg = "";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "success",
-                    "files": files,
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-        });
+    let topic= "login_topic";
+    req.body.api = "getFiles";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+    // let jsonResponse = {};
+    //
+    // let files = [];
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('files');
+    //     collection.find({'user_uuid': sessionMgmt.user_uuid}).toArray(function(err, result) {
+    //         console.log("file result is", result);
+    //         if (err) {
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result !== null) {
+    //             var msg = "";
+    //             jsonResponse = {
+    //                 "statusCode": 201,
+    //                 "result": "success",
+    //                 "files": result,
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             var msg = "";
+    //             jsonResponse = {
+    //                 "statusCode": 201,
+    //                 "result": "success",
+    //                 "files": files,
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //     });
+    // });
 }
 
 exports.createDirectory = function(req, res) {

@@ -2,16 +2,6 @@
  * Created by ManaliJain on 10/6/17.
  */
 var jwt = require('jsonwebtoken');
-// exports.restrict = function (req,res, next) {
-//     if(req.session.email){
-//         console.log("Session Authenticated");
-//         next();
-//     }else{
-//         console.log("Session expired");
-//         // res.redirect('/login');
-//         next();
-//     }
-// };
 
 exports.verifyToken = function(req,res,next) {
     var jsonResponse = {};

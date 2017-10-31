@@ -4,11 +4,13 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var passport = require('passport');
 var cors = require('cors');
-
+require('./routes/passport')(passport);
 var index = require('./routes/index');
 var users = require('./routes/users');
 var sessionManagement = require('./routes/sessionManagement');
+
 // var session = require('express-session');
 var session = require('client-sessions');
 var jwt = require('jsonwebtoken');
@@ -26,6 +28,19 @@ var app = express();
 //     duration: 15 * 60 * 1000,    //time for active session
 //     activeDuration: 60 * 60 * 1000,
 // })); // time for the session to be active when the window is open // 5 minutes set currently
+app.use(expressSessions({
+    secret: "CMPE273_passport",
+    resave: false,
+    //Forces the session to be saved back to the session store, even if the session was never modified during the request
+    saveUninitialized: false, //force to save uninitialized session to db.
+    //A session is uninitialized when it is new but not modified.
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 6 * 1000,
+    store: new mongoStore({
+        url: mongoSessionURL
+    })
+}));
+app.use(passport.initialize());
 
 var corsOptions = {
     origin: 'http://localhost:3000',
@@ -57,6 +72,26 @@ app.use('/', index);
 app.use('/users', users);
 app.post("/signup", dropboxUser.userSignupData);
 app.post("/loginData", dropboxUser.userLoginData);
+
+// app.post('/loginData', function(req, res) {
+//     passport.authenticate('login', function(err, user) {
+//         if(err) {
+//             res.status(500).send();
+//         }
+//
+//         if(!user) {
+//             res.status(401).send();
+//         }
+//         else{
+//             req.session.user = user.username;
+//             console.log(req.session.user);
+//             console.log("session initilized");
+//             return res.status(201).send({username:"test"});
+//         }
+//
+//     })(req, res);
+// });
+
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);
 app.post('/postUserInterest',sessionManagement.verifyToken, dropboxUser.postUserInterest);

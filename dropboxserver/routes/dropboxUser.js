@@ -7,11 +7,13 @@ var session = require('client-sessions');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var sessionMgmt = require('./sessionManagement');
+var kafkaConnect = require('./kafkaConnect');
 // var app = require('../app');
 // var hash = require('./encryption').hash;
 var mongo = require("./mongoConnector");
 var mongodb = require('mongodb');
 var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
+var kafka = require('./kafka/client');
 
 function checkErrors(err,result,res){
     if(err){
@@ -332,148 +334,292 @@ exports.signout = function(req,res)
 
 // USING MONGODB
 exports.userSignupData = function(req, res) {
-    //assigning unique id to user
-    let uuidv4 = uuid();
-    console.log(uuidv4);
 
-    let jsonResponse = {};
-    let saltRounds = 10;
-
-    bcrypt.hash(req.body.password, saltRounds).then(function (hash) {
-        console.log("hash :", hash);
-        mongo.connect(mongoLogin, function (mongoConn) {
-            console.log('Connected to mongo at: ' + mongoLogin);
-
-            let collection = mongoConn.collection('user');
-            // to find whether the user is already in the databse
-            collection.findOne({'email': req.body.email}, function (err, match) {
-                console.log("match is", match);
-                if (err) {
-                    var msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else if (match !== null) {
-                    var msg = "Username Already exists";
-                    jsonResponse = {
-                        "statusCode": 401,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    var payload = {
-                        "firstname": req.body.firstName,
-                        "lastname": req.body.lastName,
-                        "email": req.body.email,
-                        "password": hash,
-                        "user_uuid": uuidv4,
-                        "overview": null,
-                        "interest": null
-                    }
-                    collection.insert(payload, function (err, result) {
-                        console.log("result is", result);
-                        if (result) {
-                            var msg = "Successfully Registered. Please login with your credentials";
-                            jsonResponse = {
-                                "statusCode": 201,
-                                "result": "Success",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            var msg = "Error Occured";
-                            jsonResponse = {
-                                "statusCode": 400,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        }
-                    });
-                }
-            });
-        });
+    let topic= "login_topic";
+    req.body.api = "signup";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+    //assigning unique id to user
+    // let uuidv4 = uuid();
+    // console.log(uuidv4);
+    //
+    // let jsonResponse = {};
+    // let saltRounds = 10;
+    //
+    // bcrypt.hash(req.body.password, saltRounds).then(function (hash) {
+    //     console.log("hash :", hash);
+    //     mongo.connect(mongoLogin, function (mongoConn) {
+    //         console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //         let collection = mongoConn.collection('user');
+    //         // to find whether the user is already in the databse
+    //         collection.findOne({'email': req.body.email}, function (err, match) {
+    //             console.log("match is", match);
+    //             if (err) {
+    //                 var msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else if (match !== null) {
+    //                 var msg = "Username Already exists";
+    //                 jsonResponse = {
+    //                     "statusCode": 401,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 var payload = {
+    //                     "firstname": req.body.firstName,
+    //                     "lastname": req.body.lastName,
+    //                     "email": req.body.email,
+    //                     "password": hash,
+    //                     "user_uuid": uuidv4,
+    //                     "overview": null,
+    //                     "interest": null
+    //                 }
+    //                 collection.insert(payload, function (err, result) {
+    //                     console.log("result is", result);
+    //                     if (result) {
+    //                         var msg = "Successfully Registered. Please login with your credentials";
+    //                         jsonResponse = {
+    //                             "statusCode": 201,
+    //                             "result": "Success",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     } else {
+    //                         var msg = "Error Occured";
+    //                         jsonResponse = {
+    //                             "statusCode": 400,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     }
+    //                 });
+    //             }
+    //         });
+    //     });
+    // });
 }
 
 exports.userLoginData = function(req,res) {
-    let jsonResponse ={};
-    let email = req.body.email;
-    let password  = req.body.password;
-    console.log(email);
-    console.log(password);
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
+    // let topic= "login_topic";
+    // let response  = kafkaConnect.getKafkaConnection(topic, req);
+    // console.log("dropbox server response is",response);
+    // res.send(response);
+    // console.log(email);
 
-        collection.findOne({email: email}, function(err, result){
-            console.log("login user is",result);
-            if(err){
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result) {
-                bcrypt.compare(password, result.password).then(function (check) {
-                    console.log("check is",check);
-                    // check the response
-                    if (check) {
-
-                        //JWT
-                        var msg = "Valid user";
-                        var body = result;
-                        const user = {
-                            name: body.firstname,
-                            username: body.lastname,
-                            email: body.email,
-                            user_uuid: body.user_uuid
-                        };
-
-                        const token = jwt.sign(user, 'dropbox', {
-                            expiresIn: '30m' // expires in 30 mins
-                        });
-                        console.log("token", token);
-                        jsonResponse = {
-                            "user": user,
-                            "token": token,
-                            "statusCode": 201,
-                            "result": "Success",
-                            "message": msg,
-                            "isLogged": true,
-                            "payload": result
-                        };
-                        res.send(jsonResponse);
-                        //JWT close
-                    } else {
-                        var msg = "Invalid userName or Password";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                });
-            } else{
-                console.log("Invalid");
-                var msg = "User doesn't exist. Please Signup to continue";
-                jsonResponse = {
-                    "statusCode": 400,
-                    "result": "Success",
-                    "message": msg,
-                };
-                res.send(jsonResponse);
-            }
-        });
+    let topic= "login_topic";
+    req.body.api = "login";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // kafka.make_request('login_topic',{"username":req.body.email,"password":req.body.password}, function(err,results){
+    //     console.log('in result');
+    //     console.log(results);
+    //     if(err){
+    //         console.log('Successfully error completed');
+    //         // done(err,{}) ;
+    //     }
+    //     else
+    //     {
+    //         if(results.code == 200){
+    //             console.log('Successfully completed');
+    //             // done(null,{username:"bhavan@b.com",password:"a"});
+    //         }
+    //         else {
+    //             console.log('Successfully not completed');
+    //             // done(null,false);
+    //         }
+    //     }
+    // });
+
+
+    // var jsonResponse = {};
+    // mongo.connect(mongoLogin, function(){
+    //     let collection = mongo.collection('user');
+    //
+    //     collection.findOne({email: req.body.email}, function(err, result){
+    //         // console.log("login user is",result);
+    //         if(err){
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result) {
+    //             bcrypt.compare(req.body.password, result.password).then(function (check) {
+    //                 // console.log("check is",check);
+    //                 // check the response
+    //                 if (check) {
+    //
+    //                     //JWT
+    //                     var msg = "Valid user";
+    //                     var body = result;
+    //                     const user = {
+    //                         name: body.firstname,
+    //                         username: body.lastname,
+    //                         email: body.email,
+    //                         user_uuid: body.user_uuid
+    //                     };
+    //
+    //                     const token = jwt.sign(user, 'dropbox', {
+    //                         expiresIn: '30m' // expires in 30 mins
+    //                     });
+    //                     // console.log("token", token);
+    //                     jsonResponse = {
+    //                         "user": user,
+    //                         "token": token,
+    //                         "statusCode": 201,
+    //                         "result": "Success",
+    //                         "message": msg,
+    //                         "isLogged": true,
+    //                         "payload": result
+    //                     };
+    //                     res.send(jsonResponse);
+    //                     //JWT close
+    //                 } else {
+    //                     var msg = "Invalid userName or Password";
+    //                     jsonResponse = {
+    //                         "statusCode": 400,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             });
+    //         } else{
+    //             console.log("Invalid");
+    //             var msg = "User doesn't exist. Please Signup to continue";
+    //             jsonResponse = {
+    //                 "statusCode": 400,
+    //                 "result": "Success",
+    //                 "message": msg,
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //     });
+    // });
+
+
+
+    // var mongo = require("./mongoConnector");
+    // var mongodb = require('mongodb');
+    // var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
+    // var uuid = require('uuid/v4');
+    // var bcrypt = require('bcryptjs');
+    // var jwt = require('jsonwebtoken');
+    //
+    // function userLoginData(msg, callback){
+    //
+    //     var jsonResponse = {};
+    //     console.log("In handle request:"+ JSON.stringify(msg));
+    //
+    //     let email = msg.email;
+    //     let password  = msg.password;
+    //     console.log(email);
+    //     mongo.connect(mongoLogin, function(){
+    //         let collection = mongo.collection('user');
+    //
+    //         collection.findOne({email: email}, function(err, result){
+    //             // console.log("login user is",result);
+    //             if(err){
+    //                 var msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             }
+    //             else if (result) {
+    //                 bcrypt.compare(password, result.password).then(function (check) {
+    //                     if (check) {
+    //                         //JWT
+    //                         var msg = "Valid user";
+    //                         var body = result;
+    //                         const user = {
+    //                             name: body.firstname,
+    //                             username: body.lastname,
+    //                             email: body.email,
+    //                             user_uuid: body.user_uuid
+    //                         };
+    //
+    //                         const token = jwt.sign(user, 'dropbox', {
+    //                             expiresIn: '30m' // expires in 30 mins
+    //                         });
+    //                         // console.log("token", token);
+    //                         jsonResponse = {
+    //                             "user": user,
+    //                             "token": token,
+    //                             "statusCode": 201,
+    //                             "result": "Success",
+    //                             "message": msg,
+    //                             "isLogged": true,
+    //                             "payload": result
+    //                         };
+    //                         // res.send(jsonResponse);
+    //                         //JWT close
+    //                     } else {
+    //                         var msg = "Invalid userName or Password";
+    //                         jsonResponse = {
+    //                             "statusCode": 400,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         // res.send(jsonResponse);
+    //                     }
+    //                 });
+    //             } else{
+    //                 console.log("Invalid");
+    //                 var msg = "User doesn't exist. Please Signup to continue";
+    //                 jsonResponse = {
+    //                     "statusCode": 400,
+    //                     "result": "Success",
+    //                     "message": msg,
+    //                 };
+    //                 // res.send(jsonResponse);
+    //             }
+    //         });
+    //     });
+    //
+    //     callback(null, jsonResponse);
+    // }
+    //
+    // exports.userLoginData = userLoginData;
+
 };
 
 exports.postUserAbout = function(req,res) {
