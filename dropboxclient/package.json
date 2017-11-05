@@ -4,8 +4,10 @@
   "private": true,
   "dependencies": {
     "axios": "^0.16.2",
+    "chai": "^4.1.2",
     "express-fileupload": "^0.2.0",
     "material-ui": "^1.0.0-beta.10",
+    "mocha": "^4.0.1",
     "plotly": "^1.0.6",
     "plotly.js": "^1.31.2",
     "react": "^16.0.0",
@@ -22,7 +24,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "mocha --compilers js:babel-core/register",
     "eject": "react-scripts eject"
   }
 }

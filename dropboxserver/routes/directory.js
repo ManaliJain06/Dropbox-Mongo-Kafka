@@ -818,7 +818,8 @@ var kafkaConnect = require('./kafkaConnect');
 //MONGO code
 exports.getFiles = function(req, res) {
 
-    let topic= "login_topic";
+    let topic= "request_topic";
+    req.body.category = "directory";
     req.body.api = "getFiles";
     req.body.user_uuid = sessionMgmt.user_uuid;
     kafkaConnect.getKafkaConnection(topic, req, function(err,response){
@@ -835,6 +836,7 @@ exports.getFiles = function(req, res) {
             res.send(response);
         }
     });
+
     // let jsonResponse = {};
     //
     // let files = [];
@@ -876,416 +878,573 @@ exports.getFiles = function(req, res) {
 }
 
 exports.createDirectory = function(req, res) {
-    //assigning unique id to  directory
-    let uuidv4 = uuid();
-    console.log(uuidv4);
-    let dir_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
-    let jsonResponse = {};
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('files');
-        let payload = {
-            "user_uuid" : [sessionMgmt.user_uuid],
-            "dir_name" : req.body.dir_name,
-            "dir_uuid" : uuidv4,
-            "dir_created": dir_created_timestamp,
-            "star_id" : '0',
-            "owner_uuid" : sessionMgmt.user_uuid,
-            "filesArray" : []
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "createDirectory";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
         }
-        collection.insert(payload, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                var msg = "Error Occured. Create once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                if (result!==null) {
-                    var msg = "Directory created";
-                    jsonResponse = {
-                        "statusCode": 201,
-                        "result": "Success",
-                        "data" : result[0],
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    var msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 400,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            }
-        });
     });
+
+    // //assigning unique id to  directory
+    // let uuidv4 = uuid();
+    // console.log(uuidv4);
+    // let dir_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    //
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('files');
+    //     let payload = {
+    //         "user_uuid" : [sessionMgmt.user_uuid],
+    //         "dir_name" : req.body.dir_name,
+    //         "dir_uuid" : uuidv4,
+    //         "dir_created": dir_created_timestamp,
+    //         "star_id" : '0',
+    //         "owner_uuid" : sessionMgmt.user_uuid,
+    //         "filesArray" : []
+    //     }
+    //     collection.insert(payload, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             var msg = "Error Occured. Create once again";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             if (result!==null) {
+    //                 var msg = "Directory created";
+    //                 jsonResponse = {
+    //                     "statusCode": 201,
+    //                     "result": "Success",
+    //                     "data" : result[0],
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 var msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 400,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             }
+    //         }
+    //     });
+    // });
 }
 
 exports.deleteFile = function(req,res) {
 
-    let jsonResponse = {};
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('files');
-        let id = "ObjectId('"+req.body._id+"')";
-        console.log("id is",id);
-        collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                let msg = "Error Occured. delete once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                if (result!==null) {
-                    let msg = "file deleted";
-                    jsonResponse = {
-                        "statusCode": 201,
-                        "result": "Success",
-                        "data" : result,
-                        "message": msg
-                    };
-                    console.log(jsonResponse)
-                    res.send(jsonResponse);
-                } else {
-                    let msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 400,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "deleteFile";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('files');
+    //     let id = "ObjectId('"+req.body._id+"')";
+    //     console.log("id is",id);
+    //     collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             let msg = "Error Occured. delete once again";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             if (result!==null) {
+    //                 let msg = "file deleted";
+    //                 jsonResponse = {
+    //                     "statusCode": 201,
+    //                     "result": "Success",
+    //                     "data" : result,
+    //                     "message": msg
+    //                 };
+    //                 console.log(jsonResponse)
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 let msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 400,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             }
+    //         }
+    //     });
+    // });
 }
 
 exports.shareLink = function(req,res){
-    let jsonResponse = {};
-    let file = req.body.file;
 
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
-        let collectionLink = mongo.collection('link');
-
-        collection.findOne({email: req.body.shareToEmail }, function(err, result){
-            if(err){
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result === null) {
-                var msg = "User is not available in dropbox";
-                jsonResponse = {
-                    "statusCode": 300,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if(result){
-                let data = {
-                    "user_uuid":result.user_uuid,
-                    "link":file.filesArray[0].file_path
-                }
-                collectionLink.insert(data , function(err,result1){
-                    if (err) {
-                        var msg = "Share link failed";
-                        jsonResponse = {
-                            "statusCode": 500,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    } else {
-                        var msg = "Share file success";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                });
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "shareLink";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+
+    // let jsonResponse = {};
+    // let file = req.body.file;
+    //
+    // mongo.connect(mongoLogin, function(){
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //     let collection = mongo.collection('user');
+    //     let collectionLink = mongo.collection('link');
+    //
+    //     collection.findOne({email: req.body.shareToEmail }, function(err, result){
+    //         if(err){
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result === null) {
+    //             var msg = "User is not available in dropbox";
+    //             jsonResponse = {
+    //                 "statusCode": 300,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if(result){
+    //             let data = {
+    //                 "user_uuid":result.user_uuid,
+    //                 "link":file.filesArray[0].file_path
+    //             }
+    //             collectionLink.insert(data , function(err,result1){
+    //                 if (err) {
+    //                     var msg = "Share link failed";
+    //                     jsonResponse = {
+    //                         "statusCode": 500,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 } else {
+    //                     var msg = "Share file success";
+    //                     jsonResponse = {
+    //                         "statusCode": 201,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             });
+    //         }
+    //     });
+    // });
 }
 
 exports.starDir_files = function(req, res) {
 
-    let jsonResponse = {};
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-
-        let collection = mongoConn.collection('files');
-        collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-            {$set:{"star_id": "1" }}, function (err, result) {
-                if (err) {
-                    var msg = "Error Occured. Star once again";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    if(result.result.nModified > 0){
-                        var msg = "File/Directory starred";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "data" : result[0],
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    } else {
-                        var msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                }
-            });
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "starDirFile";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //
+    //     let collection = mongoConn.collection('files');
+    //     collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //         {$set:{"star_id": "1" }}, function (err, result) {
+    //             if (err) {
+    //                 var msg = "Error Occured. Star once again";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 if(result.result.nModified > 0){
+    //                     var msg = "File/Directory starred";
+    //                     jsonResponse = {
+    //                         "statusCode": 201,
+    //                         "result": "Success",
+    //                         "data" : result[0],
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 } else {
+    //                     var msg = "Error Occured";
+    //                     jsonResponse = {
+    //                         "statusCode": 400,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             }
+    //         });
+    // });
 }
 
 exports.shareFile = function(req,res) {
-    let jsonResponse = {};
-    let file = req.body.file;
 
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
-        let collectionFile = mongo.collection('files');
-
-        collection.findOne({email: req.body.shareToEmail }, function(err, result){
-            if(err){
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result === null) {
-                var msg = "User is not available in dropbox";
-                jsonResponse = {
-                    "statusCode": 300,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result) {
-                collectionFile.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-                    {$push:{"user_uuid": result.user_uuid }}, function (err, result1) {
-                        console.log("result is", result1);
-                        if (err) {
-                            var msg = "Share file failed";
-                            jsonResponse = {
-                                "statusCode": 500,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            if(result1.result.nModified > 0){
-                                var msg = "Share file success";
-                                jsonResponse = {
-                                    "statusCode": 201,
-                                    "result": "Success",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            } else {
-                                var msg = "Error Occured";
-                                jsonResponse = {
-                                    "statusCode": 500,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            }
-                        }
-                    });
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "shareFile";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    // let file = req.body.file;
+    //
+    // mongo.connect(mongoLogin, function(){
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //     let collection = mongo.collection('user');
+    //     let collectionFile = mongo.collection('files');
+    //
+    //     collection.findOne({email: req.body.shareToEmail }, function(err, result){
+    //         if(err){
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result === null) {
+    //             var msg = "User is not available in dropbox";
+    //             jsonResponse = {
+    //                 "statusCode": 300,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result) {
+    //             collectionFile.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //                 {$push:{"user_uuid": result.user_uuid }}, function (err, result1) {
+    //                     console.log("result is", result1);
+    //                     if (err) {
+    //                         var msg = "Share file failed";
+    //                         jsonResponse = {
+    //                             "statusCode": 500,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     } else {
+    //                         if(result1.result.nModified > 0){
+    //                             var msg = "Share file success";
+    //                             jsonResponse = {
+    //                                 "statusCode": 201,
+    //                                 "result": "Success",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         } else {
+    //                             var msg = "Error Occured";
+    //                             jsonResponse = {
+    //                                 "statusCode": 500,
+    //                                 "result": "Error",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         }
+    //                     }
+    //                 });
+    //         }
+    //     });
+    // });
 }
 
 exports.deleteDirectory = function(req, res) {
-    let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('files');
-        let id = "ObjectId('"+req.body._id+"')";
-        console.log("id is",id);
-        collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                let msg = "Error Occured. delete once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                if (result!==null) {
-                    let msg = "directory deleted";
-                    jsonResponse = {
-                        "statusCode": 201,
-                        "result": "Success",
-                        "data" : result,
-                        "message": msg
-                    };
-                    console.log(jsonResponse)
-                    res.send(jsonResponse);
-                } else {
-                    let msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 400,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "deleteDirectory";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('files');
+    //     let id = "ObjectId('"+req.body._id+"')";
+    //     console.log("id is",id);
+    //     collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             let msg = "Error Occured. delete once again";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             if (result!==null) {
+    //                 let msg = "directory deleted";
+    //                 jsonResponse = {
+    //                     "statusCode": 201,
+    //                     "result": "Success",
+    //                     "data" : result,
+    //                     "message": msg
+    //                 };
+    //                 console.log(jsonResponse)
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 let msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 400,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             }
+    //         }
+    //     });
+    // });
 }
 
 exports.shareDir =function(req,res){
-    let jsonResponse = {};
-    let file = req.body.file;
 
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
-        let collectionFile = mongo.collection('files');
-
-        collection.findOne({email: req.body.shareToEmail }, function(err, result){
-            if(err){
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result === null) {
-                var msg = "User is not available in dropbox";
-                jsonResponse = {
-                    "statusCode": 300,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result) {
-                collectionFile.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-                    {$push:{"user_uuid": result.user_uuid }}, function (err, result1) {
-                        console.log("result is", result1);
-                        if (err) {
-                            var msg = "Share folder failed";
-                            jsonResponse = {
-                                "statusCode": 500,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            if(result1.result.nModified > 0){
-                                var msg = "Share folder success";
-                                jsonResponse = {
-                                    "statusCode": 201,
-                                    "result": "Success",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            } else {
-                                var msg = "Error Occured";
-                                jsonResponse = {
-                                    "statusCode": 500,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            }
-                        }
-                    });
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "shareDirectory";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    // let file = req.body.file;
+    //
+    // mongo.connect(mongoLogin, function(){
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //     let collection = mongo.collection('user');
+    //     let collectionFile = mongo.collection('files');
+    //
+    //     collection.findOne({email: req.body.shareToEmail }, function(err, result){
+    //         if(err){
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result === null) {
+    //             var msg = "User is not available in dropbox";
+    //             jsonResponse = {
+    //                 "statusCode": 300,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result) {
+    //             collectionFile.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //                 {$push:{"user_uuid": result.user_uuid }}, function (err, result1) {
+    //                     console.log("result is", result1);
+    //                     if (err) {
+    //                         var msg = "Share folder failed";
+    //                         jsonResponse = {
+    //                             "statusCode": 500,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     } else {
+    //                         if(result1.result.nModified > 0){
+    //                             var msg = "Share folder success";
+    //                             jsonResponse = {
+    //                                 "statusCode": 201,
+    //                                 "result": "Success",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         } else {
+    //                             var msg = "Error Occured";
+    //                             jsonResponse = {
+    //                                 "statusCode": 500,
+    //                                 "result": "Error",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         }
+    //                     }
+    //                 });
+    //         }
+    //     });
+    // });
 
 }
 
 exports.deleteFileInDir = function(req,res) {
-    let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('files');
-
-            collection.update({"_id" : new mongodb.ObjectID(req.body._id)},
-                { $pull: { filesArray: {file_uuid : req.body.file_uuid }}}, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                let msg = "Error Occured. delete once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                if (result!==null) {
-                    let msg = "directory deleted";
-                    jsonResponse = {
-                        "statusCode": 201,
-                        "result": "Success",
-                        "data" : result,
-                        "message": msg
-                    };
-                    console.log(jsonResponse)
-                    res.send(jsonResponse);
-                } else {
-                    let msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 400,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            }
-        });
+    console.log("inside delete file in dir");
+    let topic= "request_topic";
+    req.body.category = "directory";
+    req.body.api = "deleteFileInDir";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('files');
+    //
+    //         collection.update({"_id" : new mongodb.ObjectID(req.body._id)},
+    //             { $pull: { filesArray: {file_uuid : req.body.file_uuid }}}, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             let msg = "Error Occured. delete once again";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             if (result!==null) {
+    //                 let msg = "directory deleted";
+    //                 jsonResponse = {
+    //                     "statusCode": 201,
+    //                     "result": "Success",
+    //                     "data" : result,
+    //                     "message": msg
+    //                 };
+    //                 console.log(jsonResponse)
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 let msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 400,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             }
+    //         }
+    //     });
+    // });
 }
 

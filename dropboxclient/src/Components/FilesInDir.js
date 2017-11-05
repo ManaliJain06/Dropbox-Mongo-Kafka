@@ -18,7 +18,7 @@ class FilesInDir extends Component{
         }
     }
 
-    deleteFiles = () => {
+    deleteFile = () => {
         const fileListInDir =  this.props.fileListInDir;
         const file = this.props.file1;
         let payload = {
@@ -75,7 +75,7 @@ class FilesInDir extends Component{
         if(file.owner_uuid !== this.state.user_uuid) {
             canDelete = <div></div>
         } else {
-            canDelete = <div className="star" onClick={this.handleDeleteFile}><u>Delete</u></div>
+            canDelete = <div className="star" onClick={this.deleteFile}><u>Delete</u></div>
         }
         return(
                     <div className ="row">

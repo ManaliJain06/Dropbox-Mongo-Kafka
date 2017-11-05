@@ -8,8 +8,6 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var sessionMgmt = require('./sessionManagement');
 var kafkaConnect = require('./kafkaConnect');
-// var app = require('../app');
-// var hash = require('./encryption').hash;
 var mongo = require("./mongoConnector");
 var mongodb = require('mongodb');
 var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
@@ -335,7 +333,8 @@ exports.signout = function(req,res)
 // USING MONGODB
 exports.userSignupData = function(req, res) {
 
-    let topic= "login_topic";
+    let topic= "request_topic";
+    req.body.category = "dropboxUser";
     req.body.api = "signup";
     kafkaConnect.getKafkaConnection(topic, req, function(err,response){
         console.log("response of dropbox user is", response);
@@ -426,7 +425,8 @@ exports.userLoginData = function(req,res) {
     // res.send(response);
     // console.log(email);
 
-    let topic= "login_topic";
+    let topic= "request_topic";
+    req.body.category = "dropboxUser";
     req.body.api = "login";
     kafkaConnect.getKafkaConnection(topic, req, function(err,response){
         console.log("response of dropbox user is", response);
@@ -534,7 +534,6 @@ exports.userLoginData = function(req,res) {
     // });
 
 
-
     // var mongo = require("./mongoConnector");
     // var mongodb = require('mongodb');
     // var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
@@ -623,137 +622,192 @@ exports.userLoginData = function(req,res) {
 };
 
 exports.postUserAbout = function(req,res) {
-    let jsonRequest ={
-        "work" : req.body.work,
-        "education" : req.body.education,
-        "phone" : req.body.phone,
-        "events" : req.body.events
-    }
-    let request = JSON.stringify(jsonRequest);
-    console.log(request);
-    let jsonResponse ={};
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-
-        let collection = mongoConn.collection('user');
-        collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-            {$set:{"overview": request }}, function (err, result) {
-                console.log("result is", result);
-                if (err) {
-                    let msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    if(result.result.nModified > 0){
-                        var msg = "Saved Successfully";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "message" : msg
-                        };
-                        res.send(jsonResponse);
-                    } else {
-                        var msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                }
-            });
+    let topic= "request_topic";
+    req.body.category = "dropboxUser";
+    req.body.api = "about";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonRequest ={
+    //     "work" : req.body.work,
+    //     "education" : req.body.education,
+    //     "phone" : req.body.phone,
+    //     "events" : req.body.events
+    // }
+    // let request = JSON.stringify(jsonRequest);
+    // console.log(request);
+    // let jsonResponse ={};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //
+    //     let collection = mongoConn.collection('user');
+    //     collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //         {$set:{"overview": request }}, function (err, result) {
+    //             console.log("result is", result);
+    //             if (err) {
+    //                 let msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 if(result.result.nModified > 0){
+    //                     var msg = "Saved Successfully";
+    //                     jsonResponse = {
+    //                         "statusCode": 201,
+    //                         "result": "Success",
+    //                         "message" : msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 } else {
+    //                     var msg = "Error Occured";
+    //                     jsonResponse = {
+    //                         "statusCode": 400,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             }
+    //         });
+    // });
 }
 
 exports.postUserInterest = function(req,res) {
 
-    let jsonRequest ={
-        "music" : req.body.music,
-        "sports" : req.body.sports,
-        "shows" : req.body.shows,
-    };
-    let request = JSON.stringify(jsonRequest);
-    console.log(request);
-    let jsonResponse ={};
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-
-        let collection = mongoConn.collection('user');
-        collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-            {$set:{"interest": request }}, function (err, result) {
-                console.log("result is", result);
-                if (err) {
-                    let msg = "Error Occured";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    if(result.result.nModified > 0){
-                        var msg = "Saved Successfully";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "message" : msg
-                        };
-                        res.send(jsonResponse);
-                    } else {
-                        var msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                }
-            });
+    let topic= "request_topic";
+    req.body.category = "dropboxUser";
+    req.body.api = "interest";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+    // let jsonRequest ={
+    //     "music" : req.body.music,
+    //     "sports" : req.body.sports,
+    //     "shows" : req.body.shows,
+    // };
+    // let request = JSON.stringify(jsonRequest);
+    // console.log(request);
+    // let jsonResponse ={};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //
+    //     let collection = mongoConn.collection('user');
+    //     collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //         {$set:{"interest": request }}, function (err, result) {
+    //             console.log("result is", result);
+    //             if (err) {
+    //                 let msg = "Error Occured";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 if(result.result.nModified > 0){
+    //                     var msg = "Saved Successfully";
+    //                     jsonResponse = {
+    //                         "statusCode": 201,
+    //                         "result": "Success",
+    //                         "message" : msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 } else {
+    //                     var msg = "Error Occured";
+    //                     jsonResponse = {
+    //                         "statusCode": 400,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             }
+    //         });
+    // });
 }
 
 exports.getLinks = function(req,res){
-    let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('link');
-        collection.find({'user_uuid': sessionMgmt.user_uuid}).toArray(function(err, result) {
-            console.log("file result is", result);
-            if (err) {
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result !== null) {
-                var msg = "";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "success",
-                    "link": result,
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 400,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "dropboxUser";
+    req.body.api = "links";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('link');
+    //     collection.find({'user_uuid': sessionMgmt.user_uuid}).toArray(function(err, result) {
+    //         console.log("file result is", result);
+    //         if (err) {
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result !== null) {
+    //             var msg = "";
+    //             jsonResponse = {
+    //                 "statusCode": 201,
+    //                 "result": "success",
+    //                 "link": result,
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 400,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //     });
+    // });
 }
 

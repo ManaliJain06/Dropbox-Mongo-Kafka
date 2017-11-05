@@ -59,16 +59,21 @@ class FilesInGroup extends Component{
         const group = this.props.group1;
 
         let canDelete =null;
-        let isOwner = fileListInGrp.file_owner;
-        if(isOwner !== undefined){
-            if(isOwner === this.state.user_uuid){
-                canDelete = <div className="options star" onClick={this.deleteFilesGroup}><u>Delete</u></div>;
-            }
-            else{
-                canDelete = <div></div>
-            }
-        } else{
-            canDelete = <div className="options star" onClick={this.deleteFilesGroup}><u>Delete</u></div>
+        // let isOwner = fileListInGrp.file_owner;
+        // if(isOwner !== undefined){
+        //     if(isOwner === this.state.user_uuid){
+        //         canDelete = <div className="options star" onClick={this.deleteFilesGroup}><u>Delete</u></div>;
+        //     }
+        //     else{
+        //         canDelete = <div></div>
+        //     }
+        // } else{
+        //     canDelete = <div className="options star" onClick={this.deleteFilesGroup}><u>Delete</u></div>
+        // }
+        if(fileListInGrp.owner_uuid !== this.state.user_uuid) {
+            canDelete = <div> </div>
+        } else {
+            canDelete = <div className="star" onClick={this.deleteFilesGroup}><u>Delete</u></div>
         }
         return(
             <div className ="row">

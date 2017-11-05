@@ -32,7 +32,7 @@ class About extends Component{
             var loginData = this.props.loginDataProp;
             this.setState({
                 ...this.state,
-                "id": loginData.id,
+                "_id": loginData._id,
                 "id": loginData.id,
                 "uuid": loginData.uuid
             }, this.callAPI);

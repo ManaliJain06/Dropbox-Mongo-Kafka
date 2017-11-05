@@ -13,6 +13,7 @@ var mysqlConnection = require('./mysqlConnector');
 var mongo = require("./mongoConnector");
 var mongodb = require('mongodb');
 var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
+var kafkaConnect = require('./kafkaConnect');
 
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
@@ -248,180 +249,247 @@ exports.saveFileGroup = function (req,res) {
 
 insertFile = function (file, filePath, user_uuid, uuidv4) {
 
-    let file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('files');
-        let payload = {
-            "user_uuid" : [sessionMgmt.user_uuid],
-            "dir_name" : '',
-            "dir_uuid" : '',
-            "dir_created": '',
-            "star_id" : '0',
-            "owner_uuid" : sessionMgmt.user_uuid,
-            "filesArray" : [{
-                "file_uuid": uuidv4,
-                "file_created" : file_created_timestamp,
-                "file_name": file.originalname,
-                "file_type": file.mimetype,
-                "file_path" : filePath
-            }]
-        }
-        collection.insert(payload, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                throw err;
-            }
-        });
+    let topic= "request_topic";
+    let req = {
+        body:{}
+    };
+    req.body.category = "files";
+    req.body.api = "insertFile";
+    req.body.user_uuid = user_uuid;
+    req.body.file = file;
+    req.body.filePath = filePath;
+    req.body.uuid = uuidv4;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
     });
+
+    // let file_created_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('files');
+    //     let payload = {
+    //         "user_uuid" : [sessionMgmt.user_uuid],
+    //         "dir_name" : '',
+    //         "dir_uuid" : '',
+    //         "dir_created": '',
+    //         "star_id" : '0',
+    //         "owner_uuid" : sessionMgmt.user_uuid,
+    //         "filesArray" : [{
+    //             "file_uuid": uuidv4,
+    //             "file_created" : file_created_timestamp,
+    //             "file_name": file.originalname,
+    //             "file_type": file.mimetype,
+    //             "file_path" : filePath
+    //         }]
+    //     }
+    //     collection.insert(payload, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             throw err;
+    //         }
+    //     });
+    // });
 };
 
 insertFileGroupAndDIR = function (file, filePath, user_uuid, uuidv4) {
 
-    var file_creation_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('filesTemp');
-        let payload = {
-                "file_uuid": uuidv4,
-                "file_created" : file_creation_timestamp,
-                "file_name": file.originalname,
-                "file_type": file.mimetype,
-                "file_path" : filePath
-        }
-        collection.insert(payload, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                throw err;
-            }
-        });
+    let topic= "request_topic";
+    let req = {
+        body:{}
+    };
+    req.body.category = "files";
+    req.body.api = "insertFileGroupAndDIR";
+    req.body.user_uuid = user_uuid;
+    req.body.file = file;
+    req.body.filePath = filePath;
+    req.body.file_uuid = uuidv4;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
     });
+
+    // var file_creation_timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('filesTemp');
+    //     let payload = {
+    //             "file_uuid": uuidv4,
+    //             "file_created" : file_creation_timestamp,
+    //             "file_name": file.originalname,
+    //             "file_type": file.mimetype,
+    //             "file_path" : filePath
+    //     }
+    //     collection.insert(payload, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             throw err;
+    //         }
+    //     });
+    // });
 };
 
 exports.uploadFileInDir = function(req,res) {
-    let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collectionFile = mongo.collection('filesTemp');
-        let collection = mongo.collection('files');
-
-        collectionFile.findOne({file_uuid: req.body.file_uuid}, function(err, result){
-            console.log("result is123",result);
-            if(err){
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result === null) {
-                var msg = "Upload Error";
-                jsonResponse = {
-                    "statusCode": 300,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result) {
-                collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-                    {$push:{"filesArray": result }}, function (err, result1) {
-                        console.log("result is", result1);
-                        if (err) {
-                            var msg = "Upload Error";
-                            jsonResponse = {
-                                "statusCode": 500,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            if(result1.result.nModified > 0){
-                                jsonResponse = {
-                                    "statusCode": 201,
-                                    "result": "Success",
-                                    "msg" : ''
-                                };
-                                res.send(jsonResponse);
-                            } else {
-                                var msg = "Upload Error";
-                                jsonResponse = {
-                                    "statusCode": 500,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            }
-                        }
-                    });
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "files";
+    req.body.api = "uploadFileInDir";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function(){
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //     let collectionFile = mongo.collection('filesTemp');
+    //     let collection = mongo.collection('files');
+    //
+    //     collectionFile.findOne({file_uuid: req.body.file_uuid}, function(err, result){
+    //         console.log("result is123",result);
+    //         if(err){
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result === null) {
+    //             var msg = "Upload Error";
+    //             jsonResponse = {
+    //                 "statusCode": 300,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result) {
+    //             collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //                 {$push:{"filesArray": result }}, function (err, result1) {
+    //                     console.log("result is", result1);
+    //                     if (err) {
+    //                         var msg = "Upload Error";
+    //                         jsonResponse = {
+    //                             "statusCode": 500,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     } else {
+    //                         if(result1.result.nModified > 0){
+    //                             jsonResponse = {
+    //                                 "statusCode": 201,
+    //                                 "result": "Success",
+    //                                 "msg" : ''
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         } else {
+    //                             var msg = "Upload Error";
+    //                             jsonResponse = {
+    //                                 "statusCode": 500,
+    //                                 "result": "Error",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         }
+    //                     }
+    //                 });
+    //         }
+    //     });
+    // });
 }
 
 exports.uploadFileInGroup = function(req,res){
-    let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collectionFile = mongo.collection('filesTemp');
-        let collection = mongo.collection('groups');
-
-        collectionFile.findOne({file_uuid: req.body.file_uuid}, function(err, result){
-            if(err){
-                var msg = "Error Occured. upload once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result === null) {
-                var msg = "Upload Error";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result) {
-                collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-                    {$push:{"filesArray": result }}, function (err, result1) {
-                        if (err) {
-                            var msg = "Error Occured. upload once again";
-                            jsonResponse = {
-                                "statusCode": 500,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            if(result1.result.nModified > 0){
-                                jsonResponse = {
-                                    "statusCode": 201,
-                                    "result": "Success",
-                                    "msg" : ''
-                                };
-                                res.send(jsonResponse);
-                            } else {
-                                var msg = "Upload Error";
-                                jsonResponse = {
-                                    "statusCode": 500,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            }
-                        }
-                    });
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "files";
+    req.body.api = "uploadFileInGroup";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function(){
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //     let collectionFile = mongo.collection('filesTemp');
+    //     let collection = mongo.collection('groups');
+    //
+    //     collectionFile.findOne({file_uuid: req.body.file_uuid}, function(err, result){
+    //         if(err){
+    //             var msg = "Error Occured. upload once again";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result === null) {
+    //             var msg = "Upload Error";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result) {
+    //             collection.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //                 {$push:{"filesArray": result }}, function (err, result1) {
+    //                     if (err) {
+    //                         var msg = "Error Occured. upload once again";
+    //                         jsonResponse = {
+    //                             "statusCode": 500,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     } else {
+    //                         if(result1.result.nModified > 0){
+    //                             jsonResponse = {
+    //                                 "statusCode": 201,
+    //                                 "result": "Success",
+    //                                 "msg" : ''
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         } else {
+    //                             var msg = "Upload Error";
+    //                             jsonResponse = {
+    //                                 "statusCode": 500,
+    //                                 "result": "Error",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         }
+    //                     }
+    //                 });
+    //         }
+    //     });
+    // });
 }

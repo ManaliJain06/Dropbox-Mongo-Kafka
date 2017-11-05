@@ -13,6 +13,7 @@ var uuid = require('uuid/v4');
 var mongo = require("./mongoConnector");
 var mongodb = require('mongodb');
 var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
+var kafkaConnect = require('./kafkaConnect');
 
 // exports.createGroup =function(req,res){
 //     let jsonResponse = {};
@@ -541,292 +542,404 @@ var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
 
 //MONGO code
 exports.createGroup =function(req,res){
-    let jsonResponse = {};
-    let uuidv4 = uuid();
-    console.log(uuidv4);
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('groups');
-        let payload = {
-            "group_uuid": uuidv4,
-            "group_name": req.body.groupName,
-            "creator_uuid": req.body.user_uuid,
-            "creator_name": req.body.user_name,
-            "membersArray": [{
-                "member_uuid": req.body.user_uuid,
-                "member_name": req.body.user_name
-                }],
-            "filesArray": []
-        };
-
-        collection.insert(payload, function (err, result) {
-            // console.log("file result is", result);
-            if (err) {
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if(result) {
-                var msg = "Group created";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "success",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                var msg = "Error";
-                jsonResponse = {
-                    "statusCode": 400,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "group";
+    req.body.api = "createGroup";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    // let uuidv4 = uuid();
+    // console.log(uuidv4);
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('groups');
+    //     let payload = {
+    //         "group_uuid": uuidv4,
+    //         "group_name": req.body.groupName,
+    //         "creator_uuid": req.body.user_uuid,
+    //         "creator_name": req.body.user_name,
+    //         "membersArray": [{
+    //             "member_uuid": req.body.user_uuid,
+    //             "member_name": req.body.user_name
+    //             }],
+    //         "filesArray": []
+    //     };
+    //
+    //     collection.insert(payload, function (err, result) {
+    //         // console.log("file result is", result);
+    //         if (err) {
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if(result) {
+    //             var msg = "Group created";
+    //             jsonResponse = {
+    //                 "statusCode": 201,
+    //                 "result": "success",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             var msg = "Error";
+    //             jsonResponse = {
+    //                 "statusCode": 400,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //     });
+    // });
 }
 
 exports.getGroup = function(req,res) {
-    let jsonResponse = {};
 
-    let groups = [];
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('groups');
-        collection.find({'membersArray.member_uuid':sessionMgmt.user_uuid}).toArray(function(err, result) {
-            console.log("group result is", result);
-            if (err) {
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result !== null) {
-                var msg = "";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "Success",
-                    "group": result,
-                    "message": ''
-                };
-                console.log("final group", groups);
-                res.send(jsonResponse);
-            } else {
-                var msg = "";
-                jsonResponse = {
-                    "statusCode": 201,
-                    "result": "success",
-                    "group": groups,
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "group";
+    req.body.api = "getGroup";
+    req.body.user_uuid = sessionMgmt.user_uuid;
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // let groups = [];
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('groups');
+    //     collection.find({'membersArray.member_uuid':sessionMgmt.user_uuid}).toArray(function(err, result) {
+    //         console.log("group result is", result);
+    //         if (err) {
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result !== null) {
+    //             var msg = "";
+    //             jsonResponse = {
+    //                 "statusCode": 201,
+    //                 "result": "Success",
+    //                 "group": result,
+    //                 "message": ''
+    //             };
+    //             console.log("final group", groups);
+    //             res.send(jsonResponse);
+    //         } else {
+    //             var msg = "";
+    //             jsonResponse = {
+    //                 "statusCode": 201,
+    //                 "result": "success",
+    //                 "group": groups,
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //     });
+    // });
 }
 
 exports.addMember = function(req,res) {
-    let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function(){
-        console.log('Connected to mongo at: ' + mongoLogin);
-        let collectionGroup = mongo.collection('groups');
-        let collection = mongo.collection('user');
-
-        collection.findOne({email: req.body.addToEmail}, function(err, result){
-            console.log("result is123",result);
-            if(err){
-                var msg = "Error Occured";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            }
-            else if (result === null) {
-                var msg = "User is not available in Dropbox";
-                jsonResponse = {
-                    "statusCode": 300,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else if (result) {
-                let name = result.firstname + " " + result.lastname;
-                var member= {
-                    "member_uuid": result.user_uuid,
-                    "member_name": name
-                }
-                collectionGroup.update({ "_id" : new mongodb.ObjectID(req.body._id)},
-                    {$push:{"membersArray": member }}, function (err, result1) {
-                        console.log("result is", result1);
-                        if (err) {
-                            var msg = "Add member failed";
-                            jsonResponse = {
-                                "statusCode": 500,
-                                "result": "Error",
-                                "message": msg
-                            };
-                            res.send(jsonResponse);
-                        } else {
-                            if(result1.result.nModified > 0){
-                                var msg = "Add member Success";
-                                jsonResponse = {
-                                    "statusCode": 201,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            } else {
-                                var msg = "Error";
-                                jsonResponse = {
-                                    "statusCode": 500,
-                                    "result": "Error",
-                                    "message": msg
-                                };
-                                res.send(jsonResponse);
-                            }
-                        }
-                    });
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "group";
+    req.body.api = "addMember";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function(){
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //     let collectionGroup = mongo.collection('groups');
+    //     let collection = mongo.collection('user');
+    //
+    //     collection.findOne({email: req.body.addToEmail}, function(err, result){
+    //         console.log("result is123",result);
+    //         if(err){
+    //             var msg = "Error Occured";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         }
+    //         else if (result === null) {
+    //             var msg = "User is not available in Dropbox";
+    //             jsonResponse = {
+    //                 "statusCode": 300,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else if (result) {
+    //             let name = result.firstname + " " + result.lastname;
+    //             var member= {
+    //                 "member_uuid": result.user_uuid,
+    //                 "member_name": name
+    //             }
+    //             collectionGroup.update({ "_id" : new mongodb.ObjectID(req.body._id)},
+    //                 {$push:{"membersArray": member }}, function (err, result1) {
+    //                     console.log("result is", result1);
+    //                     if (err) {
+    //                         var msg = "Add member failed";
+    //                         jsonResponse = {
+    //                             "statusCode": 500,
+    //                             "result": "Error",
+    //                             "message": msg
+    //                         };
+    //                         res.send(jsonResponse);
+    //                     } else {
+    //                         if(result1.result.nModified > 0){
+    //                             var msg = "Add member Success";
+    //                             jsonResponse = {
+    //                                 "statusCode": 201,
+    //                                 "result": "Error",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         } else {
+    //                             var msg = "Error";
+    //                             jsonResponse = {
+    //                                 "statusCode": 500,
+    //                                 "result": "Error",
+    //                                 "message": msg
+    //                             };
+    //                             res.send(jsonResponse);
+    //                         }
+    //                     }
+    //                 });
+    //         }
+    //     });
+    // });
 }
 
 exports.deleteMember = function(req,res){
 
-    let jsonResponse = {};
+    let topic= "request_topic";
+    req.body.category = "group";
+    req.body.api = "deleteMember";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
+    });
 
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('groups');
-
-        collection.update({"_id" : new mongodb.ObjectID(req.body._id)},
-            { $pull: { membersArray: {member_uuid : req.body.delete_uuid }}}, function (err, result) {
-                if (err) {
-                    let msg = "Error Occured. delete once again";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    if (result!==null) {
-                        let msg = "Member Deleted";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "data" : result,
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    } else {
-                        let msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                }
-            });
-    })
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('groups');
+    //
+    //     collection.update({"_id" : new mongodb.ObjectID(req.body._id)},
+    //         { $pull: { membersArray: {member_uuid : req.body.delete_uuid }}}, function (err, result) {
+    //             if (err) {
+    //                 let msg = "Error Occured. delete once again";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 if (result!==null) {
+    //                     let msg = "Member Deleted";
+    //                     jsonResponse = {
+    //                         "statusCode": 201,
+    //                         "result": "Success",
+    //                         "data" : result,
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 } else {
+    //                     let msg = "Error Occured";
+    //                     jsonResponse = {
+    //                         "statusCode": 400,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             }
+    //         });
+    // })
 }
 
 exports.deleteFileFromGroup = function(req,res) {
 
-    let jsonResponse = {};
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('groups');
-
-        collection.update({"_id": new mongodb.ObjectID(req.body._id)},
-            {$pull: {filesArray: {file_uuid: req.body.file_uuid}}}, function (err, result) {
-                // console.log("file result is", result);
-                if (err) {
-                    let msg = "Error Occured. delete once again";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "message": msg
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    if (result !== null) {
-                        let msg = "File deleted";
-                        jsonResponse = {
-                            "statusCode": 201,
-                            "result": "Success",
-                            "data": result,
-                            "message": msg
-                        };
-                        console.log(jsonResponse)
-                        res.send(jsonResponse);
-                    } else {
-                        let msg = "Error Occured";
-                        jsonResponse = {
-                            "statusCode": 400,
-                            "result": "Error",
-                            "message": msg
-                        };
-                        res.send(jsonResponse);
-                    }
-                }
-            });
+    let topic= "request_topic";
+    req.body.category = "group";
+    req.body.api = "deleteFileFromGroup";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('groups');
+    //
+    //     collection.update({"_id": new mongodb.ObjectID(req.body._id)},
+    //         {$pull: {filesArray: {file_uuid: req.body.file_uuid}}}, function (err, result) {
+    //             // console.log("file result is", result);
+    //             if (err) {
+    //                 let msg = "Error Occured. delete once again";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "message": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 if (result !== null) {
+    //                     let msg = "File deleted";
+    //                     jsonResponse = {
+    //                         "statusCode": 201,
+    //                         "result": "Success",
+    //                         "data": result,
+    //                         "message": msg
+    //                     };
+    //                     console.log(jsonResponse)
+    //                     res.send(jsonResponse);
+    //                 } else {
+    //                     let msg = "Error Occured";
+    //                     jsonResponse = {
+    //                         "statusCode": 400,
+    //                         "result": "Error",
+    //                         "message": msg
+    //                     };
+    //                     res.send(jsonResponse);
+    //                 }
+    //             }
+    //         });
+    // });
 }
 
 exports.deleteGroup = function(req,res){
 
-    let jsonResponse = {};
-
-    mongo.connect(mongoLogin, function (mongoConn) {
-        console.log('Connected to mongo at: ' + mongoLogin);
-
-        let collection = mongoConn.collection('groups');
-
-        collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
-            if (err) {
-                let msg = "Error Occured. Delete once again";
-                jsonResponse = {
-                    "statusCode": 500,
-                    "result": "Error",
-                    "message": msg
-                };
-                res.send(jsonResponse);
-            } else {
-                if (result!==null) {
-                    jsonResponse = {
-                        "statusCode": 201,
-                        "result": "Success",
-                        "msg": 'Group Successfully deleted'
-                    };
-                    res.send(jsonResponse);
-                } else {
-                    let msg = "Failed";
-                    jsonResponse = {
-                        "statusCode": 500,
-                        "result": "Error",
-                        "msg": msg
-                    };
-                    res.send(jsonResponse);
-                }
-            }
-        });
+    let topic= "request_topic";
+    req.body.category = "group";
+    req.body.api = "deleteGroup";
+    kafkaConnect.getKafkaConnection(topic, req, function(err,response){
+        console.log("response of dropbox user is", response);
+        if(err){
+            var msg = "Error Occured";
+            let jsonResponse = {
+                "statusCode": 500,
+                "result": "Error",
+                "message": msg
+            };
+            res.send(jsonResponse);
+        } else{
+            res.send(response);
+        }
     });
+
+    // let jsonResponse = {};
+    //
+    // mongo.connect(mongoLogin, function (mongoConn) {
+    //     console.log('Connected to mongo at: ' + mongoLogin);
+    //
+    //     let collection = mongoConn.collection('groups');
+    //
+    //     collection.remove({ "_id" : new mongodb.ObjectID(req.body._id)}, function (err, result) {
+    //         if (err) {
+    //             let msg = "Error Occured. Delete once again";
+    //             jsonResponse = {
+    //                 "statusCode": 500,
+    //                 "result": "Error",
+    //                 "message": msg
+    //             };
+    //             res.send(jsonResponse);
+    //         } else {
+    //             if (result!==null) {
+    //                 jsonResponse = {
+    //                     "statusCode": 201,
+    //                     "result": "Success",
+    //                     "msg": 'Group Successfully deleted'
+    //                 };
+    //                 res.send(jsonResponse);
+    //             } else {
+    //                 let msg = "Failed";
+    //                 jsonResponse = {
+    //                     "statusCode": 500,
+    //                     "result": "Error",
+    //                     "msg": msg
+    //                 };
+    //                 res.send(jsonResponse);
+    //             }
+    //         }
+    //     });
+    // });
 }
