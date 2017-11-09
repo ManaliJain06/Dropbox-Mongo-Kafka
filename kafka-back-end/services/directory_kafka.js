@@ -420,6 +420,8 @@ function shareLink(req,callback){
         let collectionLink = mongo.collection('link');
 
         collection.findOne({email: req.shareToEmail }, function(err, result){
+            console.log("share to email is",req.shareToEmail);
+            console.log("result is",result);
             if(err){
                 var msg = "Error Occured";
                 jsonResponse = {
@@ -442,7 +444,7 @@ function shareLink(req,callback){
             } else if(result){
                 let data = {
                     "user_uuid":result.user_uuid,
-                    "link":file.filesArray[0].file_path
+                    "link":req.link
                 }
                 collectionLink.insert(data , function(err,result1){
                     if (err) {

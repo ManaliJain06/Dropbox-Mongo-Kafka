@@ -110,9 +110,9 @@ class FilesList extends Component{
     }
     handleShareLink = () =>{
         const file = this.props.file;
-        var sharelinkData = {
+        let sharelinkData = {
             "shareToEmail" : this.state.email,
-            "file": file,
+            "link": file.filesArray[0].file_path,
             "user_uuid": this.state.user_uuid
         }
         this.callAPIForShareLink(sharelinkData);

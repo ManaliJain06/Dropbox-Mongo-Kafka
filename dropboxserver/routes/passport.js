@@ -4,7 +4,7 @@
 var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
 var mongo = require("./mongoConnector");
-var mongoURL = "mongodb://localhost:27017/login";
+var mongoURL = "mongodb://localhost:27017/Dropboxuser";
 
 module.exports = function(passport) {
     passport.use('login', new LocalStrategy(function(username, password, done) {
