@@ -18,8 +18,6 @@ class Activity extends Component{
             "message": '',
             "link": ''
         }
-
-        //EgnwzVKrIf5tHaoPH6ib  manalijain
     }
 
     render() {
@@ -67,43 +65,43 @@ class Activity extends Component{
             console.log(graphData);
         }
 
-        if(graphData.length >0){
-            for(let i=0; i<graphData.length; i++){
-                dates.push(graphData[i].date);
-                frequency.push(graphData[i].frequency);
-            }
+    if(graphData.length >0){
+        for(let i=0; i<graphData.length; i++){
+            dates.push(graphData[i].date);
+            frequency.push(graphData[i].frequency);
         }
-        let data = [
-            {
-                type: 'scatter',
-                x: dates,
-                y: frequency,
-                marker: {
-                    color: '#0070E0'
-                }
-            },
-        ];
-        let layout = {
-            title: 'Activity Report',
-            xaxis: {
-                title: 'time'
-            },
-            yaxis: {
-                title: 'All Directories and file created'
-            },
-        };
-        let config = {
-            showLink: false,
-            displayModeBar: true
-        };
-        return(
-            <div className="row">
-                <div className ="col-lg-1"> </div>
-                <div className ="col-lg-11">
-                    <PlotlyComponent data={data} layout={layout} config={config}/>
-                </div>
+    }
+    let data = [
+        {
+            type: 'scatter',
+            x: dates,
+            y: frequency,
+            marker: {
+                color: '#0070E0'
+            }
+        },
+    ];
+    let layout = {
+        title: 'Activity Report',
+        xaxis: {
+            title: 'time'
+        },
+        yaxis: {
+            title: 'All Directories and file created'
+        },
+    };
+    let config = {
+        showLink: false,
+        displayModeBar: true
+    };
+    return(
+        <div className="row">
+            <div className ="col-lg-1"> </div>
+            <div className ="col-lg-11">
+                <PlotlyComponent data={data} layout={layout} config={config}/>
             </div>
-        );
+        </div>
+    );
     }
 }
 function mapDispatchToProps(dispatch) {

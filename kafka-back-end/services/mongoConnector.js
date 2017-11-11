@@ -4,15 +4,15 @@
 
 //without connection pooling
 
-var mongoclient = require('mongodb').MongoClient;
-var db;
-var connected = false;
-var mongoLogin = "mongodb://localhost:27017/Dropboxuser";
-// var url = "mongodb://localhost:27017/Dropboxuser";
+let mongoclient = require('mongodb').MongoClient;
+let db;
+let connected = false;
+let mongoLogin = "mongodb://localhost:27017/Dropboxuser";
 let conn;
 
-// Connects to the MongoDB Database with the provided URL
-
+/**
+ * Connects to the MongoDB Database with the provided URL without connection pooling
+ */
 // exports.connect = function(url, callback){
 //     mongoclient.connect(url, function(err, _db){
 //         if (err) {
@@ -36,8 +36,36 @@ let conn;
 //     return db.collection(name);
 // };
 
+/**
+ * Connects to the MongoDB Database with the provided URL with DB provided connection pooling
+ */
+// exports.connect = function(url, callback){
+//     mongoclient.connect(url, { poolSize: 10 }, function(err, _db){
+//         if (err) {
+//             throw new Error('Could not connect: '+err);
+//         } else {
+//             db = _db;
+//             connected = true;
+//             // console.log(connected +" is connected?");
+//             callback(db);
+//         }
+//     });
+// };
+//
+//
+// //Returns the collection from which you want to retrieve the documents on the selected database
+//
+// exports.collection = function(name){
+//     if (!connected) {
+//         throw new Error('Must connect to Mongo before calling "collection"');
+//     }
+//     return db.collection(name);
+// };
 
-//with connection pooling
+
+/**
+ * Connects to the MongoDB Database with the provided URL with own implementation connection pooling
+ */
 
 let connectionPool = [];
 let dbPoolSize = 20;
@@ -64,8 +92,6 @@ function addMongoConnectionToPool(){
         console.log(connected +" is connected?");
     });
 }
-
-
 
 /**
  * Connects to the MongoDB Database with the provided URL
@@ -97,7 +123,6 @@ exports.collection = function(name){
         return conn.collection(name);
     } else {
         console.log("Connection pool is empty. Filling connection pool to its full capacity.");
-        //this.createConnectionPool();
         conn = connectionPool.pop();
         console.log("pool collection length: "+connectionPool.length);
         return conn.collection(name);

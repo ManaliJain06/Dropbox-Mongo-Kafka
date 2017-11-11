@@ -178,7 +178,7 @@ function userLoginData(req,callback){
                 callback(null, jsonResponse);
             }
         });
-        mongo.releaseConnection(mongoConn);
+        //mongo.releaseConnection(mongoConn);
     });
 }
 
