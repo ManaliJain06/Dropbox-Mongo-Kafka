@@ -71,35 +71,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 app.post("/signup", dropboxUser.userSignupData);
-// app.post("/loginData", dropboxUser.userLoginData);
+app.post("/loginData", dropboxUser.userLoginData);
 
-app.post('/loginData', function(req, res) {
-    passport.authenticate('login', function(err, user) {
-        if(err) {
-            let jsonResponse = {
-                "statusCode": 500,
-                "result": "error",
-                "message": msg
-            };
-            res.status(500).json({jsonResponse});
-        }
-        if(!user) {
-            let msg = "Invalid userName or Password";
-            let jsonResponse = {
-                "statusCode": 400,
-                "result": "Error",
-                "message": msg
-            };
-            res.status(400).json({jsonResponse});
-        }
-        else {
-            // req.session.user = user.username;
-            // console.log(req.session.user);
-            console.log("session initilized");
-            return res.status(201).send({username:"test"});
-        }
-    })(req, res);
-});
+// app.post('/loginData', function(req, res) {
+//     passport.authenticate('login', function(err, user) {
+//         if(err) {
+//             let jsonResponse = {
+//                 "statusCode": 500,
+//                 "result": "error",
+//                 "message": msg
+//             };
+//             res.status(500).json({jsonResponse});
+//         }
+//         if(!user) {
+//             let msg = "Invalid userName or Password";
+//             let jsonResponse = {
+//                 "statusCode": 400,
+//                 "result": "Error",
+//                 "message": msg
+//             };
+//             res.status(400).json({jsonResponse});
+//         }
+//         else {
+//             // req.session.user = user.username;
+//             // console.log(req.session.user);
+//             console.log("session initilized");
+//             return res.status(201).send({username:"test"});
+//         }
+//     })(req, res);
+// });
 
 app.post("/postUserAbout",sessionManagement.verifyToken, dropboxUser.postUserAbout);
 app.post("/signout", dropboxUser.signout);

@@ -3,29 +3,26 @@
  */
 var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
-var mongo = require("./mongoConnector");
-var mongoURL = "mongodb://localhost:27017/Dropboxuser";
+var kafka = require('./kafka/client');
 
-module.exports = function(passport) {
-    passport.use('login', new LocalStrategy(function(username, password, done) {
+module.exports = function (passport) {
+    passport.use('login', new LocalStrategy(function (username, password, done) {
         try {
-            mongo.connect(mongoURL, function(){
-                console.log('Connected to mongo at: ' + mongoURL);
-                var collection = mongo.collection('userdata');
-
-                collection.findOne({username: username, password:password}, function(err, user){
-                    console.log("login user is",user);
-                    if (user) {
-                        done(null, user);
-
-                    } else {
-                        done(null, false);
-                    }
-                });
+            kafka.make_request('request_topic', {
+                "username": username,
+                "password": password,
+                "category": "dropboxUser",
+                "api": "login"
+            }, function (err, results) {
+                if (err) {
+                   done(err,{})
+                } else {
+                    done(null,results);
+                }
             });
         }
-        catch (e){
-            done(e,{});
+        catch (e) {
+            done(e, {});
         }
     }));
 };

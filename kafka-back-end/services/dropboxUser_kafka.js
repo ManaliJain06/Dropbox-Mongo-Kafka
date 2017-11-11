@@ -111,8 +111,8 @@ function userLoginData(req,callback){
     console.log(email);
     console.log(password);
 
-    mongo.connect(mongoLogin, function(){
-        let collection = mongo.collection('user');
+    mongo.connect(mongoLogin, function(mongoConn){
+        let collection = mongoConn.collection('user');
 
         collection.findOne({email: email}, function(err, result){
             console.log("login user is",result);
@@ -178,6 +178,7 @@ function userLoginData(req,callback){
                 callback(null, jsonResponse);
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
