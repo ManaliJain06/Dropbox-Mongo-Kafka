@@ -111,6 +111,7 @@ function createGroup(req,callback){
                 callback(null, jsonResponse);
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -157,16 +158,17 @@ function getGroup(req,callback){
                 callback(null, jsonResponse);
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
 function addMember(req,callback){
     let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function(){
+    mongo.connect(mongoLogin, function(mongoConn){
         console.log('Connected to mongo at: ' + mongoLogin);
-        let collectionGroup = mongo.collection('groups');
-        let collection = mongo.collection('user');
+        let collectionGroup = mongoConn.collection('groups');
+        let collection = mongoConn.collection('user');
 
         collection.findOne({email: req.addToEmail}, function(err, result){
             console.log("result is123",result);
@@ -231,6 +233,7 @@ function addMember(req,callback){
                     });
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -276,6 +279,7 @@ function deleteMember(req,callback){
                     }
                 }
             });
+        mongo.releaseConnection(mongoConn);
     })
 }
 
@@ -323,6 +327,7 @@ function deleteFileFromGroup(req,callback){
                     }
                 }
             });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -365,5 +370,6 @@ function deleteGroup(req,callback){
                 }
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }

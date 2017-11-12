@@ -118,6 +118,7 @@ function getFiles(req,callback) {
                 callback(null, jsonResponse);
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -176,6 +177,7 @@ function createDirectory(req,callback) {
                 }
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -223,6 +225,7 @@ function deleteFile(req,callback){
                 }
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -270,6 +273,7 @@ function deleteDirectory(req,callback){
                 }
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -277,10 +281,10 @@ function shareFile(req,callback){
     let jsonResponse = {};
     let file = req.file;
 
-    mongo.connect(mongoLogin, function(){
+    mongo.connect(mongoLogin, function(mongoConn){
         console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
-        let collectionFile = mongo.collection('files');
+        let collection = mongoConn.collection('user');
+        let collectionFile = mongoConn.collection('files');
 
         collection.findOne({email: req.shareToEmail }, function(err, result){
             if(err){
@@ -339,6 +343,7 @@ function shareFile(req,callback){
                     });
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -346,10 +351,10 @@ function shareDirectory(req,callback){
     let jsonResponse = {};
     let file = req.file;
 
-    mongo.connect(mongoLogin, function(){
+    mongo.connect(mongoLogin, function(mongoConn){
         console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
-        let collectionFile = mongo.collection('files');
+        let collection = mongoConn.collection('user');
+        let collectionFile = mongoConn.collection('files');
 
         collection.findOne({email: req.shareToEmail }, function(err, result){
             if(err){
@@ -407,6 +412,7 @@ function shareDirectory(req,callback){
                     });
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -414,10 +420,10 @@ function shareLink(req,callback){
     let jsonResponse = {};
     let file = req.file;
 
-    mongo.connect(mongoLogin, function(){
+    mongo.connect(mongoLogin, function(mongoConn){
         console.log('Connected to mongo at: ' + mongoLogin);
-        let collection = mongo.collection('user');
-        let collectionLink = mongo.collection('link');
+        let collection = mongoConn.collection('user');
+        let collectionLink = mongoConn.collection('link');
 
         collection.findOne({email: req.shareToEmail }, function(err, result){
             console.log("share to email is",req.shareToEmail);
@@ -469,6 +475,7 @@ function shareLink(req,callback){
                 });
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -516,6 +523,7 @@ function deleteFileInDir(req,callback){
                     }
                 }
             });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -559,6 +567,7 @@ function starDirFile(req,callback){
                     }
                 }
             });
+        mongo.releaseConnection(mongoConn);
     });
 }
 

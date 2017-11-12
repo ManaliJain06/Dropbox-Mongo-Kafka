@@ -70,6 +70,7 @@ function insertFile(req,callback){
                 callback(null, {});
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -100,16 +101,17 @@ function insertFileGroupAndDIR(req, callback) {
                 callback(null, {});
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
 function uploadFileInDir(req,callback){
     let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function(){
+    mongo.connect(mongoLogin, function(mongoConn){
         console.log('Connected to mongo at: ' + mongoLogin);
-        let collectionFile = mongo.collection('filesTemp');
-        let collection = mongo.collection('files');
+        let collectionFile = mongoConn.collection('filesTemp');
+        let collection = mongoConn.collection('files');
 
         collectionFile.findOne({file_uuid: req.file_uuid}, function(err, result){
             console.log("result is123",result);
@@ -168,16 +170,17 @@ function uploadFileInDir(req,callback){
                     });
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
 function uploadFileInGroup(req,callback){
     let jsonResponse = {};
 
-    mongo.connect(mongoLogin, function(){
+    mongo.connect(mongoLogin, function(mongoConn){
         console.log('Connected to mongo at: ' + mongoLogin);
-        let collectionFile = mongo.collection('filesTemp');
-        let collection = mongo.collection('groups');
+        let collectionFile = mongoConn.collection('filesTemp');
+        let collection = mongoConn.collection('groups');
 
         collectionFile.findOne({file_uuid: req.file_uuid}, function(err, result){
             if(err){
@@ -234,5 +237,6 @@ function uploadFileInGroup(req,callback){
                     });
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }

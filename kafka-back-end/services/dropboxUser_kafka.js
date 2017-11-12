@@ -99,6 +99,7 @@ function postUserAbout(req, callback){
                     }
                 }
             });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -178,7 +179,7 @@ function userLoginData(req,callback){
                 callback(null, jsonResponse);
             }
         });
-        //mongo.releaseConnection(mongoConn);
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -229,6 +230,7 @@ function postUserInterest(req,callback){
                     }
                 }
             });
+        mongo.releaseConnection(mongoConn);
     });
 }
 
@@ -300,6 +302,7 @@ function userSignupData(req,callback){
                     });
                 }
             });
+            mongo.releaseConnection(mongoConn);
         });
     });
 }
@@ -343,5 +346,6 @@ function getLinks(req,callback){
                 callback(null, jsonResponse);
             }
         });
+        mongo.releaseConnection(mongoConn);
     });
 }

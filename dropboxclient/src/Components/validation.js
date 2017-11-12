@@ -13,27 +13,27 @@ export const signup = (data) => {
             msg = "All fields are mandatory. Please fill all details";
             return msg;
         }
-        // if (!(namePattern.test(data.firstName))) {
-        //     msg = "Enter correct First Name";
-        //     return msg;
-        // }
-        //
-        // if(!(namePattern.test(data.lastName))){
-        //     msg = "Enter correct Last Name";
-        //     return msg;
-        // }
-        // if (!(emailPattern.test(data.email))) {
-        //     msg = "Enter correct email address";
-        //     return msg;
-        // }
-        // if (data.password.length<8 || data.password.length>14) {
-        //     msg = "Password must be 8 to 15 character long";
-        //     return msg;
-        // }
-        // if (!(passwordPattern.test(data.password))) {
-        //         msg = "Password should contain one small letter, \n one capital letter, one digit \nand one special character ";
-        //         return msg;
-        // }
+        if (!(namePattern.test(data.firstName))) {
+            msg = "Enter correct First Name";
+            return msg;
+        }
+
+        if(!(namePattern.test(data.lastName))){
+            msg = "Enter correct Last Name";
+            return msg;
+        }
+        if (!(emailPattern.test(data.email))) {
+            msg = "Enter correct email address";
+            return msg;
+        }
+        if (data.password.length<8 || data.password.length>14) {
+            msg = "Password must be 8 to 15 character long";
+            return msg;
+        }
+        if (!(passwordPattern.test(data.password))) {
+                msg = "Password should contain one small letter, \n one capital letter, one digit \nand one special character ";
+                return msg;
+        }
         if(!check){
                 msg="please select terms and condition";
                 return msg;
@@ -45,16 +45,16 @@ export const signup = (data) => {
 export const login = (data) => {
             let msg = "";
             const emailPattern = /^[\w.]*@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
-            // const passwordPattern = /^[a-zA-z0-9]\d[8]/;
+            const passwordPattern = /^[a-zA-z0-9]\d[8]/;
 
             if( data.email ==='' || data.password ===''){
                 msg = "All fields are mandatory. Please fill all details";
                 return msg;
             }
-            // if (!(emailPattern.test(data.email))) {
-            //     msg = "Enter correct email";
-            //     return msg;
-            // }
+            if (!(emailPattern.test(data.email))) {
+                msg = "Enter correct email";
+                return msg;
+            }
             return msg;
 };
 
@@ -92,14 +92,14 @@ export const about = (data) => {
 
     if(data.work !== ''){
         if (!(pattern.test(data.work))) {
-            msg = "Enter correct music data";
+            msg = "Enter correct Work data";
             return msg;
         }
     }
 
     if(data.education !== ''){
         if (!(pattern.test(data.education))) {
-            msg = "Enter correct music data";
+            msg = "Enter correct Education data";
             return msg;
         }
     }
@@ -112,7 +112,7 @@ export const about = (data) => {
     }
     if(data.events !== ''){
         if (!(pattern.test(data.events))) {
-            msg = "Enter correct shows data";
+            msg = "Enter correct Event data";
             return msg;
         }
     }
